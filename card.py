@@ -50,9 +50,9 @@ class Card_type(Enum):
     Bug = 7
     Enabler = 8
 
-def cards_of_ggis_id(client: Session, type_id: Card_type, id_tag: str) -> Iterable[Card]:
+def cards_of_ggis_id(session: Session, type_id: Card_type, id_tag: str) -> Iterable[Card]:
     card_list = []
-    full_list = cards_of_type(client.cards_url, type_id.value)
+    full_list = cards_of_type(session, type_id.value)
     for member in  full_list:
         card = Card(member)
         if card.title.find(id_tag, 0) >= 0:

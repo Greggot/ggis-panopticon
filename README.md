@@ -15,17 +15,6 @@ sudo apt-get update
 sudo apt-get install python3.6
 ```
 
-Вероятно, у вас не будет менеджера пакетов
-```bash
-sudo apt-get install python3-pip
-```
-
-А также пока что нужно поставить пакет Кайтена 
-
-```bash
-pip3 install kaiten
-```
-
 ## Использование
 
 1. Поместить номера сторей в текстовый файл `data/tasks.txt` (или поменяйте путь в скрипте). 

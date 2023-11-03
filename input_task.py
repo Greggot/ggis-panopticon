@@ -7,6 +7,7 @@ class Input_task:
     def __init__(self, title: str, owner: User, parent: Card, session: Session):
         self.title = title
         self.session = session
+        self.parent = parent
         self.card_id = 0
 
         create_card_parameters = {
@@ -34,12 +35,12 @@ class Input_task:
 
         self.correct_title()
         self.add_member_and_make_responsible(owner)
-        self.link_to_parent_card(parent)
+        self.link_to_parent_card()
         self.add_tag('ГГИС')
 
     @property
-    def complete_title(self, card_id: int) -> str:
-        return f'[CAD]:TS.{self.parent.ggis_id}.{card_id}. {self.title}' 
+    def complete_title(self) -> str:
+        return f'[CAD]:TS.{self.parent.ggis_id}.{self.card_id}. {self.title}' 
     
     def correct_title(self):
         requests.patch(self.session.card_url(self.card_id), headers=self.session.headers, json={
@@ -51,8 +52,8 @@ class Input_task:
             "name": name
         })
 
-    def link_to_parent_card(self, parent: Card):
-        requests.post(self.session.children_url(parent.id), headers=self.session.headers, json={
+    def link_to_parent_card(self):
+        requests.post(self.session.children_url(self.parent.id), headers=self.session.headers, json={
             "card_id": self.card_id
         })
 
