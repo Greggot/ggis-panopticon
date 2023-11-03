@@ -1,4 +1,4 @@
-import kaiten
+from kaiten.session import Session
 import json
 
 from user import User
@@ -7,6 +7,7 @@ from us_tasks import parse_tasks_file
 from input_task import Input_task
 
 def output_column(title: str) -> None:
+    print()
     print('Карточки ' + title + ': ')
     card_list = user.column_card_list(title)
     card_list.sort(key=lambda card: card.id)
@@ -15,18 +16,22 @@ def output_column(title: str) -> None:
     # print(card_list[0].raw)
 
 def output_stories_enablers(client):
+    print()
     print('User stories: ')
     for card in user_stories(client):
         print('  ' + str(card))
     
+    print()
     print('Enablers: ')
     for card in enablers(client):
         print('  ' + str(card))
 
+    print()
     print('Features: ')
     for card in features(client):
         print('  ' + str(card))
 
+    print()
     print('Bugs: ')
     for card in bugs(client):
         print('  ' + str(card))
@@ -35,15 +40,15 @@ if __name__ == "__main__":
     env_file = open('env/env.json')
     env = json.load(env_file)
 
-    client = kaiten.KaitenClient(server = env['kaiten_host'], token = env['kaiten_token'])
-    user = User(client)
+    session = Session(server = env['kaiten_host'], token = env['kaiten_token'])
+    user = User(session)
     print('Пользователь: ' + str(user))
 
-    # output_column('Бэклог спринта')
-    # output_column('В работе')
-    # output_column('Ревью')
-    # output_column('Тестирование')
-    # output_column('Готово')
+    output_column('Бэклог спринта')
+    output_column('В работе')
+    output_column('Ревью')
+    output_column('Тестирование')
+    output_column('Готово')
 
     print('Карточки без родителей: ')
     for card in  user.parentless_cards():

@@ -59,12 +59,11 @@ class Card():
     
 # Утилиты для выборки всех карточек определённого вида
 
-def __all_cards_with_type__(client, type_id: int) -> list:
-    api_url = f"{client.base_api_url}/cards"
-    parameters = {
+def cards_of_type(session: Session, type_id: int) -> list:
+    request = requests.get(session.cards_url, headers=session.headers, params={
         "type_ids" : type_id
-    }
-    request = requests.get(api_url, headers=client.headers, params=parameters)
+    })
+    print(request)
     return request.json()
 
 class Card_type(Enum):
@@ -73,9 +72,9 @@ class Card_type(Enum):
     Bug = 7
     Enabler = 8
 
-def __get_card_list__(client, type_id: Card_type, id_tag: str) -> Iterable[Card]:
+def cards_of_ggis_id(client: Session, type_id: Card_type, id_tag: str) -> Iterable[Card]:
     card_list = []
-    full_list = __all_cards_with_type__(client, type_id.value)
+    full_list = cards_of_type(client.cards_url, type_id.value)
     for member in  full_list:
         card = Card(member)
         if card.title.find(id_tag, 0) >= 0:
@@ -84,14 +83,14 @@ def __get_card_list__(client, type_id: Card_type, id_tag: str) -> Iterable[Card]
     card_list.sort(key=lambda card: card.id)
     return card_list
 
-def features(client) -> Iterable[Card]:
-    return __get_card_list__(client, Card_type.Feature, ':F')
+def features(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Feature, ':F')
 
-def user_stories(client) -> Iterable[Card]:
-    return __get_card_list__(client, Card_type.User_story, ':US')
+def user_stories(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.User_story, ':US')
 
-def enablers(client) -> Iterable[Card]:
-    return __get_card_list__(client, Card_type.Enabler, ':EN')
+def enablers(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Enabler, ':EN')
 
-def bugs(client) -> Iterable[Card]:
-    return __get_card_list__(client, Card_type.Bug, ':BUG')
+def bugs(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Bug, ':BUG')
