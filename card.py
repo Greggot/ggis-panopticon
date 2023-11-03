@@ -1,11 +1,13 @@
 import requests
-from typing import List, Iterable
+from typing import Iterable
 from enum import Enum
+from kaiten.session import Session
 
 class Card():
     def __init__(self, card_json):
-        self.__data__ = card_json
         self.__ggis_id__ = ''
+        for key in card_json:
+            setattr(self, key, card_json[key])
 
     @property
     def ggis_id(self):
@@ -32,30 +34,6 @@ class Card():
     @property
     def raw(self):
         return self.__data__
-
-    @property
-    def parents_count(self):
-        return self.__data__['parents_count']
-    
-    @property
-    def owner(self):
-        return self.__data__['owner']
-    
-    @property
-    def id(self):
-        return self.__data__['id']
-    
-    @property
-    def title(self):
-        return self.__data__['title']
-    
-    @property
-    def column(self):
-        return self.__data__['column']
-    
-    @property
-    def parents_ids(self):
-        return self.__data__['parents_ids']
     
 # Утилиты для выборки всех карточек определённого вида
 
