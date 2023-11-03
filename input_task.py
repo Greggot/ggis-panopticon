@@ -17,7 +17,12 @@ class Input_task:
 
             "owner_id": owner.id,
             "owner_email": owner.email,
-            "type_id": 6
+            "type_id": 6,
+            
+            # C++ custom role
+            "properties": { 
+                "id_19": "1"
+            }
         }
         self.client = client
 
