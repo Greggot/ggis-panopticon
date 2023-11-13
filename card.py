@@ -13,15 +13,14 @@ class Card():
     def ggis_id(self):
         return self.__ggis_id__
 
-    def ggis_id_from_title(self, tag, dots: int = 3):
+    def ggis_id_from_title(self, tag, dots_size: int = 3):
         ggis_id_pos = self.title.find(tag)
         if ggis_id_pos >= 0:
-            index = 0
-            position = 0
-            for s in self.title:
+            dot_count = 0
+            for position, s in enumerate(self.title):
                 if s == '.':
-                    index = index + 1
-                    if index == dots:
+                    dot_count += 1
+                    if dot_count == dots_size:
                         break
                 position = position + 1
             self.__ggis_id__ = self.title[ggis_id_pos + len(tag) + 1:position]

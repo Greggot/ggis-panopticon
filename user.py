@@ -18,26 +18,22 @@ class User():
             "member_ids": str(self.id),
             "condition": condition
         })
-        return (Card(member) for member in request.json())
+        return Iterable(Card(member) for member in request.json())
     
     def column_card_list(self, name: str = 'В работе') -> Iterable[Card]:
         request = requests.get(self.session.cards_url, headers=self.session.headers, params={
             "member_ids": str(self.id),
             "condition": 1
         })
-        name_filtered_cards = []
         for card in (Card(member) for member in request.json()):
             if card.column['title'] == name:
-                name_filtered_cards.append(card)
-        return name_filtered_cards
+                yield card
     
     def parentless_cards(self) -> Iterable[Card]:
         request = requests.get(self.session.cards_url, headers=self.session.headers, params={
             "member_ids": str(self.id),
             "condition": 1
         })
-        parentless = []
         for card in (Card(member) for member in request.json()):
             if card.parents_count == 0:
-                parentless.append(card)
-        return parentless
+                yield card
