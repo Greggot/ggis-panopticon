@@ -1,6 +1,7 @@
+from typing import List, Iterable
 
 class US_tasks:
-    def __init__(self, us, tasklist):
+    def __init__(self, us: str, tasklist: List[str]):
         self.us = us.strip()
         self.tasklist = tasklist
 
@@ -12,10 +13,10 @@ class US_tasks:
         return self.us
     
     @property
-    def tasks(self):
-        return self.tasklist
+    def tasks(self) -> Iterable[str]:
+        return iter(self.tasklist)
 
-def parse_tasks_file(path: str) -> list:
+def parse_tasks_file(path: str) -> Iterable[US_tasks]:
     file1 = open(path,  encoding='utf-8', mode='r')
     Lines = file1.readlines()
     

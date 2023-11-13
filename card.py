@@ -1,23 +1,26 @@
 import requests
+from typing import Iterable
+from enum import Enum
+from kaiten.session import Session
 
 class Card():
     def __init__(self, card_json):
-        self.__data__ = card_json
         self.__ggis_id__ = ''
+        for key in card_json:
+            setattr(self, key, card_json[key])
 
     @property
     def ggis_id(self):
         return self.__ggis_id__
 
-    def ggis_id_from_title(self, tag, dots: int = 3):
+    def ggis_id_from_title(self, tag, dots_size: int = 3):
         ggis_id_pos = self.title.find(tag)
         if ggis_id_pos >= 0:
-            index = 0
-            position = 0
-            for s in self.title:
+            dot_count = 0
+            for position, s in enumerate(self.title):
                 if s == '.':
-                    index = index + 1
-                    if index == dots:
+                    dot_count += 1
+                    if dot_count == dots_size:
                         break
                 position = position + 1
             self.__ggis_id__ = self.title[ggis_id_pos + len(tag) + 1:position]
@@ -30,87 +33,41 @@ class Card():
     @property
     def raw(self):
         return self.__data__
+    
+# Утилиты для выборки всех карточек определённого вида
 
-    @property
-    def parents_count(self):
-        return self.__data__['parents_count']
-    
-    @property
-    def owner(self):
-        return self.__data__['owner']
-    
-    @property
-    def id(self):
-        return self.__data__['id']
-    
-    @property
-    def title(self):
-        return self.__data__['title']
-    
-    @property
-    def column(self):
-        return self.__data__['column']
-    
-    @property
-    def parents_ids(self):
-        return self.__data__['parents_ids']
-    
-def all_cards_with_type(client, type_id: int) -> list:
-    api_url = f"{client.base_api_url}/cards"
-    parameters = {
+def cards_of_type(session: Session, type_id: int) -> list:
+    request = requests.get(session.cards_url, headers=session.headers, params={
         "type_ids" : type_id
-    }
-    request = requests.get(api_url, headers=client.headers, params=parameters)
+    })
+    print(request)
     return request.json()
 
-def all_cards_from_board(client, board_id: int) -> list:
-    api_url = f"{client.base_api_url}/cards"
-    parameters = {
-        "board_id" : board_id
-    }
-    request = requests.get(api_url, headers=client.headers, params=parameters)
-    return request.json()
+class Card_type(Enum):
+    Feature = 4
+    User_story = 5
+    Bug = 7
+    Enabler = 8
 
-def features(client) -> list:
+def cards_of_ggis_id(session: Session, type_id: Card_type, id_tag: str) -> Iterable[Card]:
     card_list = []
-    full_list = all_cards_with_type(client, 4)
+    full_list = cards_of_type(session, type_id.value)
     for member in  full_list:
         card = Card(member)
-        if card.title.find(':F', 0) >= 0:
-            card.ggis_id_from_title(':F')
+        if card.title.find(id_tag, 0) >= 0:
+            card.ggis_id_from_title(id_tag)
             card_list.append(card)
     card_list.sort(key=lambda card: card.id)
     return card_list
 
-def user_stories(client) -> list:
-    card_list = []
-    full_list = all_cards_with_type(client, 5)
-    for member in  full_list:
-        card = Card(member)
-        if card.title.find(':US') >= 0:
-            card.ggis_id_from_title(':US')
-            card_list.append(card)
-    card_list.sort(key=lambda card: card.id)
-    return card_list
+def features(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Feature, ':F')
 
-def enablers(client) -> list:
-    card_list = []
-    full_list = all_cards_with_type(client, 8)
-    for member in  full_list:
-        card = Card(member)
-        if card.title.find(':EN') >= 0:
-            card.ggis_id_from_title(':EN')
-            card_list.append(card)
-    card_list.sort(key=lambda card: card.id)
-    return card_list
+def user_stories(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.User_story, ':US')
 
-def bugs(client) -> list:
-    card_list = []
-    full_list = all_cards_with_type(client, 7)
-    for member in  full_list:
-        card = Card(member)
-        if card.title.find(':BUG') >= 0:
-            card.ggis_id_from_title(':BUG')
-            card_list.append(card)
-    card_list.sort(key=lambda card: card.id)
-    return card_list
+def enablers(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Enabler, ':EN')
+
+def bugs(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, Card_type.Bug, ':BUG')
