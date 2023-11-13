@@ -59,15 +59,5 @@ if __name__ == "__main__":
         print('  ', card)
     print('}')
 
-    # output_stories_enablers(session)
-
-    planned_tasks = parse_tasks_file('data/tasks.txt')
-    for task in planned_tasks:
-        print(task)
-
-    for story in user_stories(session) + enablers(session) + bugs(session):
-        for tasklist in planned_tasks:
-            if story.ggis_id != tasklist.story:
-                continue
-            for task in tasklist.tasks:
-                input_task = Input_task(task, user, story, session)
+    output_stories_enablers(session)
+    create_cards_from_text_file('data/tasks.txt')
