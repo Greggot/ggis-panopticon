@@ -40,23 +40,25 @@ if __name__ == "__main__":
     user = User(session)
     print('Пользователь: ', user)
 
-    output_column('Бэклог спринта')
-    output_column('В работе')
-    output_column('Ревью')
-    output_column('Тестирование')
-    output_column('Готово')
+    # output_column('Бэклог спринта')
+    # output_column('В работе')
+    # output_column('Ревью')
+    # output_column('Тестирование')
+    # output_column('Готово')
 
     print('Карточки без родителей: ')
     for card in user.parentless_cards():
         print(card)
 
-    output_stories_enablers(session)
+    # output_stories_enablers(session)
 
     planned_tasks = parse_tasks_file('data/tasks.txt')
+    for task in planned_tasks:
+        print(task)
 
     for story in user_stories(session) + enablers(session) + bugs(session):
         for tasklist in planned_tasks:
-            if story.ggis_id.find(tasklist.story) < 0:
+            if story.ggis_id != tasklist.story:
                 continue
             for task in tasklist.tasks:
                 input_task = Input_task(task, user, story, session)
