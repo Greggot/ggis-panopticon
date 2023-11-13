@@ -50,13 +50,13 @@ if __name__ == "__main__":
     for card in user.parentless_cards():
         print(card)
 
-    # output_stories_enablers(session)
+    output_stories_enablers(session)
 
-    # planned_tasks = parse_tasks_file('data/tasks.txt')
+    planned_tasks = parse_tasks_file('data/tasks.txt')
 
-    # for story in user_stories(session) + enablers(session) + bugs(session):
-    #     for tasklist in planned_tasks:
-    #         if story.ggis_id.find(tasklist.story) < 0:
-    #             continue
-    #         for task in tasklist.tasks:
-    #             input_task = Input_task(task, user, story, session)
+    for story in user_stories(session) + enablers(session) + bugs(session):
+        for tasklist in planned_tasks:
+            if story.ggis_id.find(tasklist.story) < 0:
+                continue
+            for task in tasklist.tasks:
+                input_task = Input_task(task, user, story, session)
