@@ -40,7 +40,6 @@ def cards_of_type(session: Session, type_id: int) -> list:
     request = requests.get(session.cards_url, headers=session.headers, params={
         "type_ids" : type_id
     })
-    print(request)
     return request.json()
 
 class Card_type(Enum):
