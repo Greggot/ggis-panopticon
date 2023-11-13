@@ -33,7 +33,7 @@ class Input_task:
 
         print('Создана карточка: ' + self.complete_title)
 
-        self.correct_title()
+        self.set_correct_title()
         self.add_member_and_make_responsible(owner)
         self.link_to_parent_card()
         self.add_tag('ГГИС')
@@ -42,7 +42,7 @@ class Input_task:
     def complete_title(self) -> str:
         return f'[CAD]:TS.{self.parent.ggis_id}.{self.card_id}. {self.title}' 
     
-    def correct_title(self):
+    def set_correct_title(self):
         requests.patch(self.session.card_url(self.card_id), headers=self.session.headers, json={
             "title": self.complete_title
         })
