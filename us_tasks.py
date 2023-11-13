@@ -17,7 +17,7 @@ class US_tasks:
         return iter(self.tasklist)
 
 def parse_tasks_file(path: str) -> Iterable[US_tasks]:
-    file1 = open(path,  encoding='utf-8', mode='r')
+    file1 = open(path, encoding='utf-8', mode='r')
     Lines = file1.readlines()
     
     tasks = []
@@ -25,13 +25,13 @@ def parse_tasks_file(path: str) -> Iterable[US_tasks]:
     story = ''
     
     for line in Lines:
-        if line[0] != '\t':
+        if line[0] in ' \t':
+            tasklist.append(line.strip())
+        else:
             if tasklist:
                 tasks.append(US_tasks(story, tasklist.copy()))
                 tasklist.clear()
             story = line
-        else:
-            tasklist.append(line.strip())
 
     tasks.append(US_tasks(story, tasklist))
     return tasks
