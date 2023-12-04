@@ -15,6 +15,12 @@ sudo apt-get update
 sudo apt-get install python3.6
 ```
 
+Также стоит поставить питону модуль `requests`:
+```bash
+sudo apt -y install python3-pip
+pip3 install requests
+```
+
 ## Использование
 
 1. Поместить номера сторей в текстовый файл `data/tasks.txt` (или поменяйте путь в скрипте). 
