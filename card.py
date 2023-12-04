@@ -36,11 +36,24 @@ class Card():
     
 # Утилиты для выборки всех карточек определённого вида
 
-def cards_of_type(session: Session, type_id: int) -> list:
+def cards_type_request(session: Session, type_id: int, offset: int = 0):
     request = requests.get(session.cards_url, headers=session.headers, params={
-        "type_ids" : type_id
+        "type_ids" : type_id,
+        "condition": 1,
+        "offset": offset
     })
     return request.json()
+
+def cards_of_type(session: Session, type_id: int, offset: int = 0) -> list:
+    offset = 0
+    full_list = []
+    temp_list = cards_type_request(session, type_id, offset)
+    while len(temp_list) == 100:
+        offset += 100
+        full_list += temp_list
+        temp_list = cards_type_request(session, type_id, offset)
+    full_list += temp_list
+    return full_list
 
 class Card_type(Enum):
     Feature = 4
@@ -57,6 +70,7 @@ def cards_of_ggis_id(session: Session, type_id: Card_type, id_tag: str) -> Itera
             card.ggis_id_from_title(id_tag)
             card_list.append(card)
     card_list.sort(key=lambda card: card.id)
+    print('Finished search of ', id_tag)
     return card_list
 
 def features(session: Session) -> Iterable[Card]:

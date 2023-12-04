@@ -28,18 +28,30 @@ def output_stories_enablers(client):
     for card in bugs(client):
         print('  ', card)
 
-def create_cards_from_text_file(path: str) -> None:
+def create_cards_from_text_file_features(path: str) -> None:
     planned_tasks = parse_tasks_file(path)
     for task in planned_tasks:
         print(task)
 
-    for story in user_stories(session) + enablers(session) + bugs(session):
+    for story in user_stories(session) + enablers(session):
         for tasklist in planned_tasks:
             if story.ggis_id != tasklist.story:
                 continue
             for task in tasklist.tasks:
                 input_task = Input_task(task, user, story, session)
 
+def create_cards_from_text_file_bugs(path: str) -> None:
+    planned_tasks = parse_tasks_file(path)
+    for task in planned_tasks:
+        print(task)
+
+    for story in bugs(session):
+        for tasklist in planned_tasks:
+            if story.ggis_id != tasklist.story:
+                continue
+            for task in tasklist.tasks:
+                input_task = Input_task(task, user, story, session)
+                
 if __name__ == "__main__":
     env_file = open('env/env.json')
     env = json.load(env_file)
@@ -59,5 +71,6 @@ if __name__ == "__main__":
         print('  ', card)
     print('}')
 
-    output_stories_enablers(session)
-    create_cards_from_text_file('data/tasks.txt')
+    # output_stories_enablers(session)
+    # create_cards_from_text_file_bugs('data/tasks.txt')
+    create_cards_from_text_file_features('data/tasks.txt')
