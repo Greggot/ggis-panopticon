@@ -40,7 +40,6 @@ class Input_task:
         self.link_to_parent_card()
         self.add_tag('ГГИС')
         self.add_tag('C++')
-        self.add_tag('С++')
 
     @property
     def complete_title(self) -> str:
