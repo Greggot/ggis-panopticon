@@ -1,6 +1,7 @@
 import requests
 import json
 import dateutil
+import dateutil.parser
 from datetime import date
 
 from typing import Iterable
