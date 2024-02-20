@@ -54,7 +54,7 @@ def create_cards_from_text_file_bugs(path: str) -> None:
             if bug.is_late:
                 print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
             for task in tasklist.tasks:
-                input_task = Input_task(task, user, story, session)
+                input_task = Input_task(task, user, bug, session)
                 
 if __name__ == "__main__":
     env_file = open('env/env.json')
