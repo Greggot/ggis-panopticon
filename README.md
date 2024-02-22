@@ -15,6 +15,11 @@ sudo apt-get update
 sudo apt-get install python3.6
 ```
 
+Необходимо поставить расширение для стандатрного модуля по работе с датой и временем:
+```
+pip install python-dateutil
+```
+
 Также стоит поставить питону модуль `requests`:
 ```bash
 sudo apt -y install python3-pip
