@@ -1,11 +1,19 @@
 import requests
+import json
+import dateutil
+import dateutil.parser
+from datetime import date
+
 from typing import Iterable
 from enum import Enum
 from kaiten.session import Session
 
+import codecs
+
 class Card():
     def __init__(self, card_json):
         self.__ggis_id__ = ''
+        self.__data__ = card_json
         for key in card_json:
             setattr(self, key, card_json[key])
 
@@ -29,6 +37,22 @@ class Card():
 
     def __str__(self):
         return '[' + str(self.id) + '] (' + self.ggis_id + ') ' + self.title
+
+    def dump_json(self, file: str) -> None:
+        with codecs.open(file, 'w', encoding='utf-8') as fp:
+            json.dump(self.__data__, fp, ensure_ascii=False)
+
+    @property
+    def deadline(self):
+        if self.due_date is None:
+            return None
+        return dateutil.parser.parse(self.due_date).date()
+    
+    @property
+    def is_late(self):
+        if self.deadline is None:
+            return False
+        return date.today() > self.deadline
 
     @property
     def raw(self):

@@ -16,6 +16,8 @@ class Input_task:
             "size_text": '16 ч',
             "column_id": 776,
             "lane_id": 1275,
+            # "due_date": owner.due_date,
+            # "due_date_time_present": owner.due_date_time_present,
 
             "owner_id": owner.id,
             "owner_email": owner.email,
@@ -37,6 +39,7 @@ class Input_task:
         self.add_member_and_make_responsible(owner)
         self.link_to_parent_card()
         self.add_tag('ГГИС')
+        self.add_tag('C++')
 
     @property
     def complete_title(self) -> str:
