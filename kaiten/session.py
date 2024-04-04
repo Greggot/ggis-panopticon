@@ -34,6 +34,9 @@ class Session:
     
     def tags_url(self, card_id: int) -> str:
         return f'{self.cards_url}/{card_id}/tags'
+
+    def time_logs_url(self, card_id: int) -> str:
+        return f'{self.cards_url}/{card_id}/time-logs'
     
     @property
     def current_user_url(self) -> str:
