@@ -19,7 +19,8 @@ class User():
             "member_ids": str(self.id),
             "condition": condition
         })
-        return Iterable(Card(member) for member in request.json())
+        for card in (Card(member) for member in request.json()):
+            yield card
     
     def column_card_list(self, name: str = 'В работе') -> Iterable[Card]:
         request = requests.get(self.session.cards_url, headers=self.session.headers, params={
