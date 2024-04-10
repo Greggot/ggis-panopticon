@@ -1,34 +1,18 @@
 from card import Card
-from user import User
 from kaiten.session import Session
+from input_config import Input_config
 import requests
 
 class Input_task:
-    def __init__(self, title: str, owner: User, parent: Card, session: Session):
+    def __init__(self, title: str, config: Input_config, parent: Card, session: Session):
         self.title = title
         self.session = session
         self.parent = parent
         self.card_id = 0
 
-        create_card_parameters = {
-            "title": self.complete_title,
-            "board_id": 192,
-            "size_text": '16 ч',
-            "column_id": 776,
-            "lane_id": 1275,
-            # "due_date": owner.due_date,
-            # "due_date_time_present": owner.due_date_time_present,
-
-            "owner_id": owner.id,
-            "owner_email": owner.email,
-            "type_id": 6,
-
-            # C++ custom role
-            "properties": { 
-                "id_19": "1"
-            }
-        }
-        create_request = requests.post(session.cards_url, headers=self.session.headers, json=create_card_parameters)
+        create_card_parameters = config.json
+        create_card_parameters['title'] = self.complete_title
+        create_request = requests.post(session.cards_url, headers=self.session.headers, json=config.json)
 
         card = create_request.json()
         self.card_id = int(card['id'])
@@ -36,7 +20,7 @@ class Input_task:
         print('Создана карточка: ' + self.complete_title)
 
         self.set_correct_title()
-        self.add_member_and_make_responsible(owner)
+        self.add_member_and_make_responsible(config.owner_id)
         self.link_to_parent_card()
         self.add_tag('ГГИС')
         self.add_tag('C++')
@@ -60,11 +44,11 @@ class Input_task:
             "card_id": self.card_id
         })
 
-    def add_member_and_make_responsible(self, owner: Card):
+    def add_member_and_make_responsible(self, owner_id: int):
         requests.post(self.session.member_url(self.card_id), headers=self.session.headers, json={
-            "user_id": owner.id
+            "user_id": owner_id
         })
         # 1 - просто участник, 2 - ответственный
-        requests.patch(self.session.member_url(self.card_id, owner.id), headers=self.session.headers, json={
+        requests.patch(self.session.member_url(self.card_id, owner_id), headers=self.session.headers, json={
             "type": 2
         })
