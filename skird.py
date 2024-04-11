@@ -5,6 +5,7 @@ from user import User
 from card import user_stories, enablers, bugs, features
 from us_tasks import parse_tasks_file
 from input_task import Input_task
+from input_config import Input_config
 
 def output_column(title: str) -> None:
     print('\n Карточки ' + title + ': ')
@@ -28,35 +29,32 @@ def output_stories_enablers(client):
     for card in bugs(client):
         print('  ', card)
 
-def create_cards_from_text_file_features(path: str) -> None:
-    planned_tasks = parse_tasks_file(path)
-    for task in planned_tasks:
+def output_planned_tasks(path: str) -> None:
+    for task in parse_tasks_file(path):
         print(task)
 
+def create_cards_from_text_file_features(path: str, config: Input_config) -> None:
     for story in user_stories(session) + enablers(session):
-        for tasklist in planned_tasks:
+        for tasklist in  parse_tasks_file(path):
             if story.ggis_id != tasklist.story:
                 continue
             if story.is_late:
                 print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
             for task in tasklist.tasks:
-                input_task = Input_task(task, user, story, session)
+                input_task = Input_task(task, config, story, session)
 
-def create_cards_from_text_file_bugs(path: str) -> None:
-    planned_tasks = parse_tasks_file(path)
-    for task in planned_tasks:
-        print(task)
-
+def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
     for bug in bugs(session):
-        for tasklist in planned_tasks:
+        for tasklist in parse_tasks_file(path):
             if bug.ggis_id != tasklist.story:
                 continue
             if bug.is_late:
                 print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
             for task in tasklist.tasks:
-                input_task = Input_task(task, user, bug, session)
+                input_task = Input_task(task, config, bug, session)
                 
 if __name__ == "__main__":
+    config_name = 'delivery'
     env_file = open('env/env.json')
     env = json.load(env_file)
 
@@ -70,11 +68,18 @@ if __name__ == "__main__":
     # output_column('Тестирование')
     # output_column('Готово')
 
+    # output_stories_enablers(session)
+
     print('Карточки без родителей: {')
     for card in user.parentless_cards():
         print('  ', card)
     print('}')
 
-    # output_stories_enablers(session)
-    # create_cards_from_text_file_bugs('data/tasks.txt')
-    create_cards_from_text_file_features('data/tasks.txt')
+    output_planned_tasks('data/tasks.txt')
+    print(f'Создать карточки с конфигом {config_name}? [Y/N]:\n')
+
+    agreement = input()
+    if agreement.upper()[0] == 'Y':
+        config = Input_config(config_name, user)
+        # create_cards_from_text_file_bugs('data/tasks.txt', config)
+        create_cards_from_text_file_features('data/tasks.txt', config)
