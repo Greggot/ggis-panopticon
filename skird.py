@@ -5,7 +5,7 @@ import json
 
 from user import User
 from card import user_stories, enablers, bugs, features
-from us_tasks import parse_tasks_file
+from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
 
