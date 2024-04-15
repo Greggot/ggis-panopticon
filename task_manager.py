@@ -76,15 +76,21 @@ while True:
 
     if card_parent is None:
         while True:
-            card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)", type=str)
-            if not card_parent.isspace():
-                break
+            try:
+                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)", type=str)
+                if not card_parent.isspace():
+                    break
+            except UnicodeDecodeError:
+                print("Что-то пошло не так... Давайте еще раз")
 
     card_name = None
     while True:
-        card_name = click.prompt("Введите название вашей задачи", type=str)
-        if not card_name.isspace():
-            break
+        try:
+            card_name = click.prompt("Введите название вашей задачи", type=str)
+            if not card_name.isspace():
+                break
+        except UnicodeDecodeError:
+            print("Что-то пошло не так... Давайте еще раз")
 
     config_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'json', 'skird_config'))
     config_files = os.listdir(config_dir)
