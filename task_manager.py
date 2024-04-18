@@ -6,6 +6,9 @@ import sys
 import argparse
 import click
 import os
+from helper import check_and_prepare_configs_path
+
+check_and_prepare_configs_path()
 
 parser = argparse.ArgumentParser(
     prog=sys.argv[0],
@@ -92,7 +95,7 @@ while True:
         except UnicodeDecodeError:
             print("Что-то пошло не так... Давайте еще раз")
 
-    config_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'json', 'skird_config'))
+    config_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'env', 'skird_config'))
     config_files = os.listdir(config_dir)
 
     index = 0

@@ -8,6 +8,7 @@ from card import user_stories, enablers, bugs, features
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
+from helper import check_and_prepare_configs_path
 import os.path
 
 
@@ -119,6 +120,8 @@ if __name__ == "__main__":
     import sys
     import argparse
     import click
+
+    check_and_prepare_configs_path()
 
     config_name = 'delivery'
     tasks_file = 'data/tasks.txt'
