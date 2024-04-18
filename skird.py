@@ -55,7 +55,7 @@ def output_planned_tasks(path: str) -> None:
                             task["config"] = "по-умолчанию"
                         if "size" not in task:
                             task["size"] = "по умолчанию из кофигурации"
-                        print(f"{type} {parent} '{task["name"]}' с кофигурацей {task["config"]} cо временем {task["size"]}")
+                        print(f"{type} {parent} '{task['name']}' с кофигурацей {task['config']} cо временем {task['size']}")
         except KeyError:
             print("Неверный формат json-файла!")
             exit(1)
