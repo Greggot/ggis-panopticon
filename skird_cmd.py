@@ -12,7 +12,7 @@ from helper import check_and_prepare_configs_path
 import os.path
 
 
-def output_column(title: str) -> None:
+def output_column(user: User, title: str) -> None:
     print('\n Карточки ' + title + ': ')
     for card in user.column_card_list(title):
         print('  ', card)
@@ -56,13 +56,14 @@ def output_planned_tasks(path: str) -> None:
                             task["config"] = "по-умолчанию"
                         if "size" not in task:
                             task["size"] = "по умолчанию из кофигурации"
-                        print(f"{type} {parent} '{task['name']}' с кофигурацей {task['config']} cо временем {task['size']}")
+                        print(
+                            f"{type} {parent} '{task['name']}' с кофигурацей {task['config']} cо временем {task['size']}")
         except KeyError:
             print("Неверный формат json-файла!")
             exit(1)
 
 
-def create_cards_from_text_file_features(path: str, config: Input_config) -> None:
+def create_cards_from_text_file_features(session: Session, path: str, config: Input_config) -> None:
     for story in user_stories(session) + enablers(session):
         for tasklist in parse_tasks_file(path):
             if story.ggis_id != tasklist.story:
@@ -73,7 +74,7 @@ def create_cards_from_text_file_features(path: str, config: Input_config) -> Non
                 input_task = Input_task(task, config, story, session)
 
 
-def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
+def create_cards_from_text_file_bugs(session: Session, path: str, config: Input_config) -> None:
     for bug in bugs(session):
         for tasklist in parse_tasks_file(path):
             if bug.ggis_id != tasklist.story:
@@ -84,7 +85,10 @@ def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
                 input_task = Input_task(task, config, bug, session)
 
 
-def json_parsing_parent(parent_list, json_tasks_group, def_config_name: str):
+def json_parsing_parent(session: Session, parent_list, json_tasks_group, def_config_name: str, user: User = None):
+    if user is None:
+        user = User(session)
+
     for parent in parent_list:
         for dev_tasks_parent in json_tasks_group:
             if parent.ggis_id != dev_tasks_parent.strip():
@@ -101,48 +105,33 @@ def json_parsing_parent(parent_list, json_tasks_group, def_config_name: str):
                 Input_task(task["name"], Input_config(config, user), parent, session, size)
 
 
-def create_cards_from_json(path: str, def_config_name: str) -> None:
+def create_cards_from_json(session: Session, path: str, def_config_name: str, user: User = None) -> None:
+    if user is None:
+        user = User(session)
+
     with open(path) as f:
         json_tasks = json.load(f)
     try:
         if "US-EN" in json_tasks:
             if len(json_tasks["US-EN"]) > 0:
-                json_parsing_parent(user_stories(session) + enablers(session), json_tasks["US-EN"], def_config_name)
+                json_parsing_parent(session=session, user=user,
+                                    parent_list=user_stories(session) + enablers(session),
+                                    json_tasks_group=json_tasks["US-EN"],
+                                    def_config_name=def_config_name)
         if "BUG" in json_tasks:
             if len(json_tasks["BUG"]) > 0:
-                json_parsing_parent(bugs(session), json_tasks["BUG"], def_config_name)
+                json_parsing_parent(session=session, user=user,
+                                    parent_list=bugs(session),
+                                    json_tasks_group=json_tasks["US-EN"],
+                                    def_config_name=def_config_name)
     except KeyError:
         print("Неверный формат json-файла!")
         exit(1)
 
 
-if __name__ == "__main__":
-    import sys
-    import argparse
+def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', find_bugs: bool = False,
+          find_features: bool = False):
     import click
-
-    check_and_prepare_configs_path()
-
-    config_name = 'delivery'
-    tasks_file = 'data/tasks.txt'
-
-    parser = argparse.ArgumentParser(
-        prog=sys.argv[0],
-        description='Скрипт для автоматизированного создания задач')
-    parser.add_argument('-t', '--type', nargs='?',
-                        help='выбор типа создаваемых тасков по-умолчанию', choices=['delivery', 'discovery'],
-                        default=config_name)
-    parser.add_argument('-p', '--path', nargs='?', help='путь до файла с прописанными задачами',
-                        default=tasks_file)
-    parser.add_argument('-b', '--bugs', action='store_true', help="искать баги (игнорируется с json-форматом)")
-    parser.add_argument('--no-features', action='store_false', help="не искать фичи (игнорируется с json-форматом)")
-
-    args = parser.parse_args()
-    find_bugs = args.bugs
-    find_features = args.no_features
-    config_name = args.type
-    tasks_file = args.path
-
     if not os.path.isfile(tasks_file):
         print(f"Не найден файл конфигурации с тасками ({tasks_file})")
         exit(1)
@@ -178,8 +167,32 @@ if __name__ == "__main__":
         if not use_json:
             config = Input_config(config_name, user)
             if find_bugs:
-                create_cards_from_text_file_bugs(tasks_file, config)
+                create_cards_from_text_file_bugs(path=tasks_file, config=config, session=session)
             if find_features:
-                create_cards_from_text_file_features(tasks_file, config)
+                create_cards_from_text_file_features(path=tasks_file, config=config, session=session)
         else:
-            create_cards_from_json(tasks_file, config_name)
+            create_cards_from_json(path=tasks_file, def_config_name=config_name, session=session, user=user)
+
+
+if __name__ == "__main__":
+    import sys
+    import argparse
+
+    check_and_prepare_configs_path()
+
+    config_name = 'delivery'
+    tasks_file = 'data/tasks.txt'
+
+    parser = argparse.ArgumentParser(
+        prog=sys.argv[0],
+        description='Скрипт для автоматизированного создания задач')
+    parser.add_argument('-t', '--type', nargs='?',
+                        help='выбор типа создаваемых тасков по-умолчанию', choices=['delivery', 'discovery'],
+                        default=config_name)
+    parser.add_argument('-p', '--path', nargs='?', help='путь до файла с прописанными задачами',
+                        default=tasks_file)
+    parser.add_argument('-b', '--bugs', action='store_true', help="искать баги (игнорируется с json-форматом)")
+    parser.add_argument('--no-features', action='store_false', help="не искать фичи (игнорируется с json-форматом)")
+
+    args = parser.parse_args()
+    skird(tasks_file=args.path, config_name=args.type, find_bugs=args.bugs, find_features=args.no_features)
