@@ -125,8 +125,12 @@ while True:
 
     json_data[card_type][card_parent].append(new_card)
 
+    if not os.path.exists(os.path.abspath(os.path.join(tasks_file, os.pardir))):
+         os.mkdir(os.path.abspath(os.path.join(tasks_file, os.pardir)))
+
     with open(tasks_file, "w", encoding="utf-8") as write:
         json.dump(json_data, write, sort_keys=True, indent=2, ensure_ascii=False)
+
 
     if not click.confirm('Добавить еще карточку?', default=False):
         break
