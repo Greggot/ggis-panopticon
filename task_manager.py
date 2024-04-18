@@ -1,11 +1,11 @@
 #!/bin/python3
-import subprocess
 
 import json
 import sys
 import argparse
 import click
 import os
+
 from helper import check_and_prepare_configs_path
 
 check_and_prepare_configs_path()
@@ -80,7 +80,8 @@ while True:
     if card_parent is None:
         while True:
             try:
-                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)", type=str)
+                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)",
+                                           type=str)
                 if not card_parent.isspace():
                     break
             except UnicodeDecodeError:
@@ -129,15 +130,14 @@ while True:
     json_data[card_type][card_parent].append(new_card)
 
     if not os.path.exists(os.path.abspath(os.path.join(tasks_file, os.pardir))):
-         os.mkdir(os.path.abspath(os.path.join(tasks_file, os.pardir)))
+        os.mkdir(os.path.abspath(os.path.join(tasks_file, os.pardir)))
 
     with open(tasks_file, "w", encoding="utf-8") as write:
         json.dump(json_data, write, sort_keys=True, indent=2, ensure_ascii=False)
 
-
     if not click.confirm('Добавить еще карточку?', default=False):
         break
 
-# if click.confirm('Запустить скрипт создания новых карточек с вашей конфигурацией?', default=True):
-#     skird_skript = tasks_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'skird.py'))
-#     subprocess.run([skird_skript, '-p', tasks_file])
+if click.confirm('Запустить скрипт создания новых карточек с Вашей конфигурацией?', default=True):
+    import skird_cmd
+    skird_cmd.skird(tasks_file=tasks_file)
