@@ -37,11 +37,8 @@ class Input_task:
 
     @property
     def complete_title(self) -> str:
-        if self.card_type == Task_Type.delivery:
+        if self.card_type == Task_Type.delivery or self.card_type == Task_Type.discovery:
             return f'[CAD]:TS.{self.parent.ggis_id}.{self.card_id}. {self.title}'
-
-        if self.card_type == Task_Type.discovery:
-            return f'[CAD]:TD.{self.parent.ggis_id}.{self.card_id}. {self.title}'
 
     def set_correct_title(self):
         requests.patch(self.session.card_url(self.card_id), headers=self.session.headers, json={
