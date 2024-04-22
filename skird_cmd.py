@@ -122,7 +122,7 @@ def create_cards_from_json(session: Session, path: str, def_config_name: str, us
             if len(json_tasks["BUG"]) > 0:
                 json_parsing_parent(session=session, user=user,
                                     parent_list=bugs(session),
-                                    json_tasks_group=json_tasks["US-EN"],
+                                    json_tasks_group=json_tasks["BUG"],
                                     def_config_name=def_config_name)
     except KeyError:
         print("Неверный формат json-файла!")
