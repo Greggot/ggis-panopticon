@@ -1,3 +1,5 @@
+#!/bin/python3
+
 from kaiten.session import Session
 import json
 

@@ -2,16 +2,26 @@ from card import Card
 from kaiten.session import Session
 from input_config import Input_config
 import requests
+from enum import Enum
+
+
+class Task_Type(Enum):
+    delivery = 6
+    discovery = 11
+
 
 class Input_task:
-    def __init__(self, title: str, config: Input_config, parent: Card, session: Session):
+    def __init__(self, title: str, config: Input_config, parent: Card, session: Session, size: int = None):
         self.title = title
         self.session = session
         self.parent = parent
         self.card_id = 0
 
         create_card_parameters = config.json
+        self.card_type = Task_Type(create_card_parameters['type_id'])
         create_card_parameters['title'] = self.complete_title
+        if size is not None:
+            create_card_parameters['size_text'] = f"{size} ч"
         create_request = requests.post(session.cards_url, headers=self.session.headers, json=config.json)
 
         card = create_request.json()
@@ -27,8 +37,9 @@ class Input_task:
 
     @property
     def complete_title(self) -> str:
-        return f'[CAD]:TS.{self.parent.ggis_id}.{self.card_id}. {self.title}' 
-    
+        if self.card_type == Task_Type.delivery or self.card_type == Task_Type.discovery:
+            return f'[CAD]:TS.{self.parent.ggis_id}.{self.card_id}. {self.title}'
+
     def set_correct_title(self):
         requests.patch(self.session.card_url(self.card_id), headers=self.session.headers, json={
             "title": self.complete_title
