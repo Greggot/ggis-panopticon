@@ -1,6 +1,6 @@
 from typing import List, Iterable
 
-class US_tasks:
+class dev_tasks:
     def __init__(self, us: str, tasklist: List[str]):
         self.us = us.strip()
         self.tasklist = tasklist
@@ -16,7 +16,7 @@ class US_tasks:
     def tasks(self) -> Iterable[str]:
         return iter(self.tasklist)
 
-def parse_tasks_file(path: str) -> Iterable[US_tasks]:
+def parse_tasks_file(path: str) -> Iterable[dev_tasks]:
     file1 = open(path, encoding='utf-8', mode='r')
     Lines = file1.readlines()
     
@@ -29,9 +29,9 @@ def parse_tasks_file(path: str) -> Iterable[US_tasks]:
             tasklist.append(line.strip())
         else:
             if tasklist:
-                tasks.append(US_tasks(story, tasklist.copy()))
+                tasks.append(dev_tasks(story, tasklist.copy()))
                 tasklist.clear()
             story = line
 
-    tasks.append(US_tasks(story, tasklist))
+    tasks.append(dev_tasks(story, tasklist))
     return tasks
