@@ -106,7 +106,7 @@ def tag_from_card_type(type: CardType) -> str:
 
 def card_from_type(session: Session, type_id: CardType, identificator: str) -> Card | None:
     tag = tag_from_card_type(type_id)
-    card_ident = f"{tag}.{identificator}"
+    card_ident = f"{tag}.{identificator}."
     single_list = cards_type_request(session=session, type_id=type_id.value, limit=1, query=card_ident)
     if len(single_list) == 1:
         card = Card(single_list[0])
