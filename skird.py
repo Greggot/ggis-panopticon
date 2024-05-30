@@ -41,8 +41,9 @@ def output_planned_tasks(path: str) -> None:
 
 
 def create_cards_from_text_file_features(path: str, config: Input_config) -> None:
+    tasklists = parse_tasks_file(path)
     for story in user_stories(session) + enablers(session):
-        for tasklist in parse_tasks_file(path):
+        for tasklist in tasklists:
             if story.ggis_id != tasklist.story:
                 continue
             if story.is_late:

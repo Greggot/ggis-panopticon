@@ -1,22 +1,22 @@
 from typing import List, Iterable
 
-class dev_tasks:
-    def __init__(self, us: str, tasklist: List[str]):
-        self.us = us.strip()
+class Dev_tasks:
+    def __init__(self, a_story: str, tasklist: List[str]):
+        self._story = a_story.strip()
         self.tasklist = tasklist
 
     def __str__(self):
-        return self.us + ': ' + str(self.tasklist)
+        return self._story + ': ' + str(self.tasklist)
     
     @property
     def story(self):
-        return self.us
+        return self._story
     
     @property
     def tasks(self) -> Iterable[str]:
         return iter(self.tasklist)
 
-def parse_tasks_file(path: str) -> Iterable[dev_tasks]:
+def parse_tasks_file(path: str) -> List[Dev_tasks]:
     file1 = open(path, encoding='utf-8', mode='r')
     Lines = file1.readlines()
     
@@ -29,9 +29,9 @@ def parse_tasks_file(path: str) -> Iterable[dev_tasks]:
             tasklist.append(line.strip())
         else:
             if tasklist:
-                tasks.append(dev_tasks(story, tasklist.copy()))
-                tasklist.clear()
+                tasks.append(Dev_tasks(story, tasklist))
+                tasklist = []
             story = line
 
-    tasks.append(dev_tasks(story, tasklist))
+    tasks.append(Dev_tasks(story, tasklist))
     return tasks
