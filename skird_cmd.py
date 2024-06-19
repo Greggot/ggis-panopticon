@@ -1,10 +1,11 @@
 #!/bin/python3
+from typing import Set
 
 from kaiten.session import Session
 import json
 
 from user import User
-from card import user_stories, enablers, bugs, features
+from card import user_stories, enablers, bugs, features, CardType, card_from_types
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
@@ -64,45 +65,49 @@ def output_planned_tasks(path: str) -> None:
 
 
 def create_cards_from_text_file_features(session: Session, path: str, config: Input_config) -> None:
-    for story in user_stories(session) + enablers(session):
-        for tasklist in parse_tasks_file(path):
-            if story.ggis_id != tasklist.story:
-                continue
-            if story.is_late:
-                print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
-            for task in tasklist.tasks:
-                input_task = Input_task(task, config, story, session)
+    for tasklist in parse_tasks_file(path):
+        story = card_from_types(session=session, type_ids={CardType.User_story, CardType.Enabler}, identificator=tasklist.story)
+        if story is None:
+            print(f'[WARNING] Не удалось отыскать карточку с номером {tasklist.story}')
+            continue
+        if story.is_late:
+            print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
+        for task in tasklist.tasks:
+            Input_task(task, config, story, session)
 
 
 def create_cards_from_text_file_bugs(session: Session, path: str, config: Input_config) -> None:
-    for bug in bugs(session):
-        for tasklist in parse_tasks_file(path):
-            if bug.ggis_id != tasklist.story:
-                continue
-            if bug.is_late:
-                print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
-            for task in tasklist.tasks:
-                input_task = Input_task(task, config, bug, session)
+    for tasklist in parse_tasks_file(path):
+        bug = card_from_types(session=session, type_ids={CardType.Bug}, identificator=tasklist.story)
+        if bug is None:
+            print(f'[WARNING] Не удалось отыскать карточку с номером {tasklist.story}')
+            continue
+        if bug.is_late:
+            print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
+        for task in tasklist.tasks:
+            Input_task(task, config, bug, session)
 
 
-def json_parsing_parent(session: Session, parent_list, json_tasks_group, def_config_name: str, user: User = None):
+def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_group, def_config_name: str,
+                         user: User = None):
     if user is None:
         user = User(session)
 
-    for parent in parent_list:
-        for dev_tasks_parent in json_tasks_group:
-            if parent.ggis_id != dev_tasks_parent.strip():
-                continue
-            if parent.is_late:
-                print(f'[WARNING] Истек срок карточки: {parent.title}, deadline: {parent.deadline}')
-            for task in json_tasks_group[dev_tasks_parent]:
-                config = def_config_name
-                size = None
-                if "config" in task:
-                    config = task["config"]
-                if "size" in task:
-                    size = task["size"]
-                Input_task(task["name"], Input_config(config, user), parent, session, size)
+    for parent_id in json_tasks_group:
+        parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id)
+        if parent_card is None:
+            print(f'[WARNING] Не удалось отыскать карточку с номером {parent_id}')
+            continue
+        if parent_card.is_late:
+            print(f'[WARNING] Истек срок карточки: {parent_card.title}, deadline: {parent_card.deadline}')
+        for task in json_tasks_group[parent_id]:
+            config = def_config_name
+            size = None
+            if "config" in task:
+                config = task["config"]
+            if "size" in task:
+                size = task["size"]
+            Input_task(task["name"], Input_config(config, user), parent_card, session, size)
 
 
 def create_cards_from_json(session: Session, path: str, def_config_name: str, user: User = None) -> None:
@@ -112,18 +117,36 @@ def create_cards_from_json(session: Session, path: str, def_config_name: str, us
     with open(path) as f:
         json_tasks = json.load(f)
     try:
+        if "ALL" in json_tasks:
+            if len(json_tasks["ALL"]) > 0:
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.User_story, CardType.Enabler, CardType.Bug},
+                                     json_tasks_group=json_tasks["ALL"],
+                                     def_config_name=def_config_name)
         if "US-EN" in json_tasks:
             if len(json_tasks["US-EN"]) > 0:
-                json_parsing_parent(session=session, user=user,
-                                    parent_list=user_stories(session) + enablers(session),
-                                    json_tasks_group=json_tasks["US-EN"],
-                                    def_config_name=def_config_name)
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.User_story, CardType.Enabler},
+                                     json_tasks_group=json_tasks["US-EN"],
+                                     def_config_name=def_config_name)
         if "BUG" in json_tasks:
             if len(json_tasks["BUG"]) > 0:
-                json_parsing_parent(session=session, user=user,
-                                    parent_list=bugs(session),
-                                    json_tasks_group=json_tasks["BUG"],
-                                    def_config_name=def_config_name)
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.Bug},
+                                     json_tasks_group=json_tasks["BUG"],
+                                     def_config_name=def_config_name)
+        if "US" in json_tasks:
+            if len(json_tasks["US"]) > 0:
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.User_story},
+                                     json_tasks_group=json_tasks["US"],
+                                     def_config_name=def_config_name)
+        if "EN" in json_tasks:
+            if len(json_tasks["EN"]) > 0:
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.Enabler},
+                                     json_tasks_group=json_tasks["EN"],
+                                     def_config_name=def_config_name)
     except KeyError:
         print("Неверный формат json-файла!")
         exit(1)
