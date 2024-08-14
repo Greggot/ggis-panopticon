@@ -4,13 +4,12 @@ import json
 from kaiten.session import Session
 from kaiten.user import User
 from card_utils import user_stories, enablers, bugs, output_planned_tasks
+from card_creator import Card_creator
+from card_creator_config import Card_creator_config
 from dev_tasks import parse_tasks_file
-from input_task import Input_task
-from input_config import Input_config
 from config_utils import check_and_prepare_configs_path
 
-
-def create_cards_from_text_file_features(path: str, config: Input_config) -> None:
+def create_cards_from_text_file_features(path: str, config: Card_creator_config) -> None:
     tasklists = parse_tasks_file(path)
     for story in user_stories(session) + enablers(session):
         for tasklist in tasklists:
@@ -19,10 +18,10 @@ def create_cards_from_text_file_features(path: str, config: Input_config) -> Non
             if story.is_late:
                 print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
             for task in tasklist.tasks:
-                Input_task(task, config, story, session)
+                Card_creator(task, config, story, session)
 
 
-def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
+def create_cards_from_text_file_bugs(path: str, config: Card_creator_config) -> None:
     for bug in bugs(session):
         for tasklist in parse_tasks_file(path):
             if bug.ggis_id != tasklist.story:
@@ -30,7 +29,7 @@ def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
             if bug.is_late:
                 print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
             for task in tasklist.tasks:
-                Input_task(task, config, bug, session)
+                Card_creator(task, config, bug, session)
 
 
 if __name__ == "__main__":
@@ -60,6 +59,6 @@ if __name__ == "__main__":
 
     agreement = input()
     if agreement.upper()[0] == 'Y':
-        config = Input_config(config_name, user)
+        config = Card_creator_config(config_name, user)
         # create_cards_from_text_file_bugs('data/tasks.txt', config)
         create_cards_from_text_file_features('data/tasks.txt', config)
