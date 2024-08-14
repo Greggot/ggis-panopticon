@@ -1,40 +1,17 @@
 #!/bin/python3
 from typing import Set
 
+from card import CardType
+from card_utils import card_from_types
 from kaiten.session import Session
 import json
 
 from user import User
-from card import user_stories, enablers, bugs, features, CardType, card_from_types
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
-from helper import check_and_prepare_configs_path
+from config_utils import check_and_prepare_configs_path
 import os.path
-
-
-def output_column(user: User, title: str) -> None:
-    print('\n Карточки ' + title + ': ')
-    for card in user.column_card_list(title):
-        print('  ', card)
-
-
-def output_stories_enablers(client):
-    print('\nUser stories: ')
-    for card in user_stories(client):
-        print('  ', card)
-
-    print('\nEnablers: ')
-    for card in enablers(client):
-        print('  ', card)
-
-    print('\nFeatures: ')
-    for card in features(client):
-        print('  ', card)
-
-    print('\nBugs: ')
-    for card in bugs(client):
-        print('  ', card)
 
 
 def output_planned_tasks(path: str) -> None:

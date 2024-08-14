@@ -1,6 +1,5 @@
 import os
 
-
 def existence_configs_check(
         configs_target_path: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'env', 'skird_config')),
         silent: bool = True) -> bool:
@@ -37,7 +36,6 @@ def prepare_configs_path(
     except Exception as e:
         print(e)
         return False
-
 
 def check_and_prepare_configs_path() -> None:
     if not existence_configs_check(silent=True):

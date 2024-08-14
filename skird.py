@@ -4,40 +4,12 @@ from kaiten.session import Session
 import json
 
 from user import User
-from card import user_stories, enablers, bugs, features
+from card_utils import user_stories, enablers, bugs
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
-from helper import check_and_prepare_configs_path
-
-
-def output_column(title: str) -> None:
-    print('\n Карточки ' + title + ': ')
-    for card in user.column_card_list(title):
-        print('  ', card)
-
-
-def output_stories_enablers(client):
-    print('\nUser stories: ')
-    for card in user_stories(client):
-        print('  ', card)
-
-    print('\nEnablers: ')
-    for card in enablers(client):
-        print('  ', card)
-
-    print('\nFeatures: ')
-    for card in features(client):
-        print('  ', card)
-
-    print('\nBugs: ')
-    for card in bugs(client):
-        print('  ', card)
-
-
-def output_planned_tasks(path: str) -> None:
-    for task in parse_tasks_file(path):
-        print(task)
+from config_utils import check_and_prepare_configs_path
+from card_utils import output_planned_tasks
 
 
 def create_cards_from_text_file_features(path: str, config: Input_config) -> None:
@@ -49,7 +21,7 @@ def create_cards_from_text_file_features(path: str, config: Input_config) -> Non
             if story.is_late:
                 print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
             for task in tasklist.tasks:
-                input_task = Input_task(task, config, story, session)
+                Input_task(task, config, story, session)
 
 
 def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
@@ -60,15 +32,13 @@ def create_cards_from_text_file_bugs(path: str, config: Input_config) -> None:
             if bug.is_late:
                 print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
             for task in tasklist.tasks:
-                input_task = Input_task(task, config, bug, session)
+                Input_task(task, config, bug, session)
 
 
 if __name__ == "__main__":
     check_and_prepare_configs_path()
-
     config_name = 'delivery'
-    env_file = open('env/env.json')
-    env = json.load(env_file)
+    env = json.load(open('env/env.json'))
 
     session = Session(server=env['kaiten_host'], token=env['kaiten_token'])
     user = User(session)
@@ -87,7 +57,7 @@ if __name__ == "__main__":
         print('  ', card)
     print('}')
 
-    output_planned_tasks('data/tasks.txt')
+    output_planned_tasks(parse_tasks_file('data/tasks.txt'))
     print(f'Создать карточки с конфигом {config_name}? [Y/N]:\n')
 
     agreement = input()
