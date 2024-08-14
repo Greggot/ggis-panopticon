@@ -4,7 +4,7 @@ from kaiten.session import Session
 import json
 
 from kaiten.user import User
-from time_log import time_logs_from_card
+from kaiten.time_log import time_logs_from_card
 from time_log_input import Time_log_input
 
 def check_spent_time(user: User, session: Session):
