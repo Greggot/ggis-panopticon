@@ -6,16 +6,6 @@ from typing import List, Iterable, Set
 from kaiten.user import User
 from dev_tasks import Dev_tasks
 
-def tag_from_card_type(type: CardType) -> str:
-    if type == CardType.Feature:
-        return ':F'
-    if type == CardType.User_story:
-        return ':US'
-    if type == CardType.Bug:
-        return ':BUG'
-    if type == CardType.Enabler:
-        return ':EN'
-
 """ type_id - тип карточек (сторя, энейблер...)
     offset - сдвиг, если требуется запросить >100 карточек
     limit - максимальное количество карточек для получения
@@ -50,7 +40,7 @@ def cards_of_type(session: Session, type_id: int, offset: int = 0) -> list:
 
 
 def card_from_type(session: Session, type_id: CardType, identificator: str) -> Card | None:
-    tag = tag_from_card_type(type_id)
+    tag = type_id.tag
     card_ident = f"{tag}.{identificator}."
     single_list = cards_type_request(session=session, type_id=type_id.value, limit=1, query=card_ident)
     if len(single_list) == 1:
@@ -84,19 +74,19 @@ def cards_of_ggis_id(session: Session, type_id: CardType, id_tag: str) -> Iterab
 
 
 def features(session: Session) -> Iterable[Card]:
-    return cards_of_ggis_id(session, CardType.Feature, tag_from_card_type(CardType.Feature))
+    return cards_of_ggis_id(session, CardType.Feature, CardType.Feature.tag)
 
 
 def user_stories(session: Session) -> Iterable[Card]:
-    return cards_of_ggis_id(session, CardType.User_story, tag_from_card_type(CardType.User_story))
+    return cards_of_ggis_id(session, CardType.User_story, CardType.User_story.tag)
 
 
 def enablers(session: Session) -> Iterable[Card]:
-    return cards_of_ggis_id(session, CardType.Enabler, tag_from_card_type(CardType.Enabler))
+    return cards_of_ggis_id(session, CardType.Enabler, CardType.Enabler.tag)
 
 
 def bugs(session: Session) -> Iterable[Card]:
-    return cards_of_ggis_id(session, CardType.Bug, tag_from_card_type(CardType.Bug))
+    return cards_of_ggis_id(session, CardType.Bug, CardType.Bug.tag)
 
 
 def output_column(user: User, title: str) -> None:

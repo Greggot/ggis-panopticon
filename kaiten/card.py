@@ -55,7 +55,16 @@ class Card:
         return self.__data__
     
 class CardType(Enum):
-    Feature = 4
-    User_story = 5
-    Bug = 7
-    Enabler = 8
+    Feature = 4, ':F'
+    User_story = 5, ':US'
+    Bug = 7, ':BUG'
+    Enabler = 8, ':EN'
+
+    def __new__(cls, value, tag):
+            member = object.__new__(cls)
+            member._value_ = value
+            member.tag = tag
+            return member
+    
+    def __int__(self):
+        return self.value
