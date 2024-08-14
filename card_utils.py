@@ -1,4 +1,5 @@
 import requests
+import asyncio
 from kaiten.card import Card, CardType
 from kaiten.session import Session
 from typing import List, Iterable, Set
@@ -125,3 +126,24 @@ def output_stories_enablers(client):
 def output_planned_tasks(dev_task_list: List[Dev_tasks]) -> None:
     for task in dev_task_list:
         print(task)
+
+async def gather_all_cards(session: Session, offset):
+    return requests.get(session.cards_url, headers=session.headers, params={
+        "offset": offset
+    })
+
+""" Когда-то Рома писал это, чтобы поулчить список карточек тега 'Эс++' 
+    Вроде, это можно поправить средствами самого Кайтена, но я пока оставлю
+"""
+async def es_plus_plus_cards(session: Session) -> Iterable[Card]:
+    tasks = []
+    for i in range(0, 2000, 100):
+        tasks.append(asyncio.create_task(gather_all_cards(session, i)))
+    responses = await asyncio.gather(*tasks)
+    res = []
+    for response in responses:
+        for card in (Card(member) for member in response.json()):
+            for tag_description in card.__dict__.get('tags', {}):
+                if ('name', 'С++') in tag_description.items():
+                    res.append(card)
+    return res

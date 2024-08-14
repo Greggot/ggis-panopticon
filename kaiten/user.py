@@ -1,8 +1,7 @@
-import requests
 from kaiten.card import Card
 from typing import Iterable
 from kaiten.session import Session
-import asyncio
+import requests
 
 class User():
     def __init__(self, session: Session):
@@ -39,26 +38,4 @@ class User():
         for card in (Card(member) for member in request.json()):
             if card.parents_count == 0:
                 yield card
-
-    async def gather(self, cond):
-        return requests.get(self.session.cards_url, headers=self.session.headers, params={
-            # "member_ids": str(self.id),
-            "offset": cond
-
-        })
-
-    # for card in asyncio.run(user.es_plus_plus_cards()):
-    #         print('  ', card)
-    async def es_plus_plus_cards(self) -> Iterable[Card]:
-        tasks = []
-        for i in range(0, 2000, 100):
-            tasks.append(asyncio.create_task(self.gather(i)))
-        responses = await asyncio.gather(*tasks)
-        res = []
-        for response in responses:
-            for card in (Card(member) for member in response.json()):
-                for tag_description in card.__dict__.get('tags', {}):
-                    if ('name', 'С++') in tag_description.items():
-                        res.append(card)
-        return res
     
