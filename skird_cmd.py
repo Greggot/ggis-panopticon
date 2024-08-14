@@ -1,12 +1,12 @@
 #!/bin/python3
 from typing import Set
 
-from card import CardType
+from kaiten.card import CardType
 from card_utils import card_from_types
 from kaiten.session import Session
 import json
 
-from user import User
+from kaiten.user import User
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config

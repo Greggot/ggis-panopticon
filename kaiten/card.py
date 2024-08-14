@@ -6,7 +6,7 @@ import dateutil.parser
 from datetime import date
 from enum import Enum
 
-class Card():
+class Card:
     def __init__(self, card_json):
         self.__ggis_id__ = ''
         self.__data__ = card_json

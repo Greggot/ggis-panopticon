@@ -1,15 +1,13 @@
 #!/bin/python3
 
-from kaiten.session import Session
 import json
-
-from user import User
-from card_utils import user_stories, enablers, bugs
+from kaiten.session import Session
+from kaiten.user import User
+from card_utils import user_stories, enablers, bugs, output_planned_tasks
 from dev_tasks import parse_tasks_file
 from input_task import Input_task
 from input_config import Input_config
 from config_utils import check_and_prepare_configs_path
-from card_utils import output_planned_tasks
 
 
 def create_cards_from_text_file_features(path: str, config: Input_config) -> None:

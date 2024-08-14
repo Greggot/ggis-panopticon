@@ -1,4 +1,4 @@
-from user import User
+from kaiten.user import User
 import json
 
 class Input_config:

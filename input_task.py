@@ -1,4 +1,4 @@
-from card import Card
+from kaiten.card import Card
 from kaiten.session import Session
 from input_config import Input_config
 import requests
