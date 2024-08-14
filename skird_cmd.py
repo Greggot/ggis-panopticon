@@ -84,7 +84,7 @@ def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_grou
                 config = task["config"]
             if "size" in task:
                 size = task["size"]
-            Input_task(task["name"], Input_config(config, user), parent_card, session, size)
+            Input_task(task["name"], Input_config(config, user, size), parent_card, session)
 
 
 def create_cards_from_json(session: Session, path: str, def_config_name: str, user: User = None) -> None:

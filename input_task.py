@@ -2,30 +2,28 @@ from kaiten.card import Card
 from kaiten.session import Session
 from input_config import Input_config
 import requests
-from enum import Enum
-
+from enum import Enum, IntEnum
 
 class Task_Type(Enum):
     delivery = 6
     discovery = 11
 
+# 1 - просто участник, 2 - ответственный
+class Responsibility(IntEnum):
+    member = 1
+    owner = 2
 
 class Input_task:
-    def __init__(self, title: str, config: Input_config, parent: Card, session: Session, size: int = None):
+    def __init__(self, title: str, config: Input_config, parent: Card, session: Session):
         self.title = title
         self.session = session
         self.parent = parent
         self.card_id = 0
 
-        create_card_parameters = config.json
-        self.card_type = Task_Type(create_card_parameters['type_id'])
-        create_card_parameters['title'] = self.complete_title
-        if size is not None:
-            create_card_parameters['size_text'] = f"{size} ч"
+        self.card_type = Task_Type(config.json['type_id'])
+        config.json['title'] = self.complete_title
         create_request = requests.post(session.cards_url, headers=self.session.headers, json=config.json)
-
-        card = create_request.json()
-        self.card_id = int(card['id'])
+        self.card_id = int(create_request.json()['id'])
 
         print('Создана карточка: ' + self.complete_title)
 
@@ -59,7 +57,6 @@ class Input_task:
         requests.post(self.session.member_url(self.card_id), headers=self.session.headers, json={
             "user_id": owner_id
         })
-        # 1 - просто участник, 2 - ответственный
         requests.patch(self.session.member_url(self.card_id, owner_id), headers=self.session.headers, json={
-            "type": 2
+            "type": Responsibility.owner
         })
