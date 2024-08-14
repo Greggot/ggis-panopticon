@@ -1,40 +1,17 @@
 #!/bin/python3
 from typing import Set
 
+from kaiten.card import CardType
+from card_utils import card_from_types
 from kaiten.session import Session
 import json
 
-from user import User
-from card import user_stories, enablers, bugs, features, CardType, card_from_types
+from kaiten.user import User
 from dev_tasks import parse_tasks_file
-from input_task import Input_task
-from input_config import Input_config
-from helper import check_and_prepare_configs_path
+from card_creator import Card_creator
+from card_creator_config import Card_creator_config
+from config_utils import check_and_prepare_configs_path
 import os.path
-
-
-def output_column(user: User, title: str) -> None:
-    print('\n Карточки ' + title + ': ')
-    for card in user.column_card_list(title):
-        print('  ', card)
-
-
-def output_stories_enablers(client):
-    print('\nUser stories: ')
-    for card in user_stories(client):
-        print('  ', card)
-
-    print('\nEnablers: ')
-    for card in enablers(client):
-        print('  ', card)
-
-    print('\nFeatures: ')
-    for card in features(client):
-        print('  ', card)
-
-    print('\nBugs: ')
-    for card in bugs(client):
-        print('  ', card)
 
 
 def output_planned_tasks(path: str) -> None:
@@ -64,7 +41,7 @@ def output_planned_tasks(path: str) -> None:
             exit(1)
 
 
-def create_cards_from_text_file_features(session: Session, path: str, config: Input_config) -> None:
+def create_cards_from_text_file_features(session: Session, path: str, config: Card_creator_config) -> None:
     for tasklist in parse_tasks_file(path):
         story = card_from_types(session=session, type_ids={CardType.User_story, CardType.Enabler}, identificator=tasklist.story)
         if story is None:
@@ -73,10 +50,10 @@ def create_cards_from_text_file_features(session: Session, path: str, config: In
         if story.is_late:
             print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
         for task in tasklist.tasks:
-            Input_task(task, config, story, session)
+            Card_creator(task, config, story, session)
 
 
-def create_cards_from_text_file_bugs(session: Session, path: str, config: Input_config) -> None:
+def create_cards_from_text_file_bugs(session: Session, path: str, config: Card_creator_config) -> None:
     for tasklist in parse_tasks_file(path):
         bug = card_from_types(session=session, type_ids={CardType.Bug}, identificator=tasklist.story)
         if bug is None:
@@ -85,7 +62,7 @@ def create_cards_from_text_file_bugs(session: Session, path: str, config: Input_
         if bug.is_late:
             print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
         for task in tasklist.tasks:
-            Input_task(task, config, bug, session)
+            Card_creator(task, config, bug, session)
 
 
 def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_group, def_config_name: str,
@@ -107,7 +84,7 @@ def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_grou
                 config = task["config"]
             if "size" in task:
                 size = task["size"]
-            Input_task(task["name"], Input_config(config, user), parent_card, session, size)
+            Card_creator(task["name"], Card_creator_config(config, user, size), parent_card, session)
 
 
 def create_cards_from_json(session: Session, path: str, def_config_name: str, user: User = None) -> None:
@@ -188,7 +165,7 @@ def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', fin
     output_planned_tasks(tasks_file)
     if click.confirm(f'Создать карточки с конфигом {config_name} по-умолчанию?', default=True):
         if not use_json:
-            config = Input_config(config_name, user)
+            config = Card_creator_config(config_name, user)
             if find_bugs:
                 create_cards_from_text_file_bugs(path=tasks_file, config=config, session=session)
             if find_features:

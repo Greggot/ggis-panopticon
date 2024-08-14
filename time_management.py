@@ -3,9 +3,8 @@
 from kaiten.session import Session
 import json
 
-from user import User
-from card import user_stories, enablers, bugs, features
-from time_log import time_logs_from_card
+from kaiten.user import User
+from kaiten.time_log import time_logs_from_card
 from time_log_input import Time_log_input
 
 def check_spent_time(user: User, session: Session):
@@ -33,5 +32,3 @@ if __name__ == "__main__":
     if agreement.upper()[0] == 'Y':
         time_log_input.register_time(session)
         print(f'\nУспешно списано! Удачи продуктивно потратить сэкономленные {12 * time_log_input.days_count} секунд своей жизни!')
-    
-

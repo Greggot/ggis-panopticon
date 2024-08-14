@@ -6,7 +6,7 @@ import argparse
 import click
 import os
 
-from helper import check_and_prepare_configs_path
+from config_utils import check_and_prepare_configs_path
 
 check_and_prepare_configs_path()
 
