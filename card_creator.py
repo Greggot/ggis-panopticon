@@ -25,7 +25,7 @@ class Card_creator:
         create_request = requests.post(session.cards_url, headers=self.session.headers, json=config.json)
         self.card_id = int(create_request.json()['id'])
 
-        print('Создана карточка: ' + self.complete_title)
+        print(f"Создана карточка: \"{self.complete_title}\"  --> https://kaiten.iccdev.ru/{self.card_id}")
 
         self.set_correct_title()
         self.add_member_and_make_responsible(config.owner_id)
