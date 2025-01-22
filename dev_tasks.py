@@ -28,8 +28,11 @@ def parse_tasks_file(path: str) -> List[Dev_tasks]:
     story = ''
     
     for line in Lines:
+        linestrip = line.strip()
+        if len(linestrip) == 0:
+            continue
         if line[0] in ' \t':
-            tasklist.append(line.strip())
+            tasklist.append(linestrip)
         else:
             if tasklist:
                 tasks.append(Dev_tasks(story, tasklist))

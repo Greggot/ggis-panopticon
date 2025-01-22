@@ -49,10 +49,13 @@ if __name__ == "__main__":
 
     # output_stories_enablers(session)
 
-    print('Карточки без родителей: {')
-    for card in user.parentless_cards():
-        print('  ', card)
-    print('}')
+    # Кое-кто понадвигал карточки и поубирал стори, не буду
+    # показывать пальцем. В общем, этот список сейчас смотреть
+    # нет смысла
+    # print('Карточки без родителей: {')
+    # for card in user.parentless_cards():
+    #     print('  ', card)
+    # print('}')
 
     output_planned_tasks(parse_tasks_file('data/tasks.txt'))
     print(f'Создать карточки с конфигом {config_name}? [Y/N]:\n')
