@@ -43,7 +43,7 @@ def output_planned_tasks(path: str) -> None:
 
 def create_cards_from_text_file_features(session: Session, path: str, config: Card_creator_config) -> None:
     for tasklist in parse_tasks_file(path):
-        story = card_from_types(session=session, type_ids={CardType.User_story, CardType.Enabler}, identificator=tasklist.story)
+        story = card_from_types(session=session, type_ids={CardType.User_story, CardType.Enabler, CardType.Techdolg}, identificator=tasklist.story)
         if story is None:
             print(f'[WARNING] Не удалось отыскать карточку с номером {tasklist.story}')
             continue
@@ -97,7 +97,7 @@ def create_cards_from_json(session: Session, path: str, def_config_name: str, us
         if "ALL" in json_tasks:
             if len(json_tasks["ALL"]) > 0:
                 json_parsing_parents(session=session, user=user,
-                                     types={CardType.User_story, CardType.Enabler, CardType.Bug},
+                                     types={CardType.User_story, CardType.Enabler, CardType.Bug, CardType.Techdolg},
                                      json_tasks_group=json_tasks["ALL"],
                                      def_config_name=def_config_name)
         if "US-EN" in json_tasks:
@@ -123,6 +123,12 @@ def create_cards_from_json(session: Session, path: str, def_config_name: str, us
                 json_parsing_parents(session=session, user=user,
                                      types={CardType.Enabler},
                                      json_tasks_group=json_tasks["EN"],
+                                     def_config_name=def_config_name)
+        if "DB" in json_tasks:
+            if len(json_tasks["DB"]) > 0:
+                json_parsing_parents(session=session, user=user,
+                                     types={CardType.Techdolg},
+                                     json_tasks_group=json_tasks["DB"],
                                      def_config_name=def_config_name)
     except KeyError:
         print("Неверный формат json-файла!")

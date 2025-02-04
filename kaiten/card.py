@@ -59,6 +59,7 @@ class CardType(Enum):
     User_story = 5, ':US'
     Bug = 7, ':BUG'
     Enabler = 8, ':EN'
+    Techdolg = 9, ':DB'
 
     def __new__(cls, value, tag):
             member = object.__new__(cls)

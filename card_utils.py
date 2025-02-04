@@ -85,6 +85,10 @@ def enablers(session: Session) -> Iterable[Card]:
     return cards_of_ggis_id(session, CardType.Enabler, CardType.Enabler.tag)
 
 
+def techdolg(session: Session) -> Iterable[Card]:
+    return cards_of_ggis_id(session, CardType.Techdolg, CardType.Techdolg.tag)
+
+
 def bugs(session: Session) -> Iterable[Card]:
     return cards_of_ggis_id(session, CardType.Bug, CardType.Bug.tag)
 
@@ -110,6 +114,10 @@ def output_stories_enablers(client):
 
     print('\nBugs: ')
     for card in bugs(client):
+        print('  ', card)
+
+    print('\Techdolg: ')
+    for card in techdolg(client):
         print('  ', card)
 
 
