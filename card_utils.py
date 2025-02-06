@@ -1,5 +1,6 @@
 import requests
 import asyncio
+from requests import Response
 from kaiten.card import Card, CardType
 from kaiten.session import Session
 from typing import List, Iterable, Set
@@ -23,6 +24,10 @@ def cards_type_request(session: Session, type_id: int, offset: int = 0, limit: i
     request = requests.get(session.cards_url, headers=session.headers, params=params)
     return request.json()
 
+def card_id_request(session: Session, type_id: int) -> Response:
+    request = requests.get(session.card_url(type_id), headers=session.headers)
+    return request
+
 
 """ API Кайтена возвращает по 100 карточек максимум за раз. Для обхода ограничения 
     используется поле 'offset' в запросе. С ним были какие-то проблемы, мы так и не выяснили.
@@ -38,9 +43,34 @@ def cards_of_type(session: Session, type_id: int, offset: int = 0) -> list:
     full_list += temp_list
     return full_list
 
+def identificator_is_id(ident: str) -> int | None:
+    if ident.find('.') != -1:
+        return None
+    try:
+        real_id = int(ident)
+        if real_id > 10000:
+            return real_id
+    except ValueError:
+        return None
+    return None
 
-def card_from_type(session: Session, type_id: CardType, identificator: str) -> Card | None:
+def card_from_id(session: Session, identificator: str) -> Card | None:
+    real_id = identificator_is_id(identificator)
+    if real_id is not None:
+        res = card_id_request(session, real_id)
+        if res.status_code != 200:
+            return None
+        return Card(res.json())
+    return None
+
+def card_from_type(session: Session, type_id: CardType, identificator: str, try_convert_ident_to_id: bool = False) -> Card | None:
     tag = type_id.tag
+    if try_convert_ident_to_id:
+        card = card_from_id(session, identificator)
+        if card is not None:
+            if card.title.find(tag, 0) >= 0:
+                card.ggis_id_from_title(tag)
+                return card
     card_ident = f"{tag}.{identificator}."
     single_list = cards_type_request(session=session, type_id=type_id.value, limit=1, query=card_ident)
     if len(single_list) == 1:
@@ -51,9 +81,9 @@ def card_from_type(session: Session, type_id: CardType, identificator: str) -> C
     return None
 
 
-def card_from_types(session: Session, type_ids: Set[CardType], identificator: str) -> Card | None:
+def card_from_types(session: Session, type_ids: Set[CardType], identificator: str, try_convert_ident_to_id: bool = False) -> Card | None:
     for type_id in type_ids:
-        card = card_from_type(session=session, type_id=type_id, identificator=identificator)
+        card = card_from_type(session=session, type_id=type_id, identificator=identificator, try_convert_ident_to_id=try_convert_ident_to_id)
         if card is not None:
             return card
 
@@ -116,7 +146,7 @@ def output_stories_enablers(client):
     for card in bugs(client):
         print('  ', card)
 
-    print('\Techdolg: ')
+    print('\nTechdolg: ')
     for card in techdolg(client):
         print('  ', card)
 
