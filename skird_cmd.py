@@ -2,7 +2,7 @@
 from typing import Set
 
 from kaiten.card import CardType
-from card_utils import card_from_types
+from card_utils import card_from_types, card_from_id
 from kaiten.session import Session
 import json
 
@@ -71,7 +71,13 @@ def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_grou
         user = User(session)
 
     for parent_id in json_tasks_group:
-        parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id)
+        if len(types) == 0 or len(types) >= len(CardType):
+            parent_card = card_from_id(session=session,identificator=parent_id)
+            if parent_card is None:
+                parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id)
+        else:
+            parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id,
+                                          try_convert_ident_to_id=True)
         if parent_card is None:
             print(f'[WARNING] Не удалось отыскать карточку с номером {parent_id}')
             continue
@@ -136,7 +142,7 @@ def create_cards_from_json(session: Session, path: str, def_config_name: str, us
 
 
 def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', find_bugs: bool = False,
-          find_features: bool = False):
+          find_features: bool = False, show_parentless: bool = False):
     import click
     if not os.path.isfile(tasks_file):
         print(f"Не найден файл конфигурации с тасками ({tasks_file})")
@@ -149,18 +155,11 @@ def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', fin
     user = User(session)
     print('Пользователь: ', user)
 
-    # output_column('Бэклог спринта')
-    # output_column('В работе')
-    # output_column('Ревью')
-    # output_column('Тестирование')
-    # output_column('Готово')
-
-    # output_stories_enablers(session)
-
-    print('Карточки без родителей: {')
-    for card in user.parentless_cards():
-        print('  ', card)
-    print('}')
+    if show_parentless:
+        print('Карточки без родителей: {')
+        for card in user.parentless_cards():
+            print('  ', card)
+        print('}')
 
     use_json = False
     split_filename = os.path.splitext(tasks_file)
@@ -199,6 +198,9 @@ if __name__ == "__main__":
                         default=tasks_file)
     parser.add_argument('-b', '--bugs', action='store_true', help="искать баги (игнорируется с json-форматом)")
     parser.add_argument('--no-features', action='store_false', help="не искать фичи (игнорируется с json-форматом)")
+    parser.add_argument('--parentless', action='store_true', help="вывести список карточек без родителей")
+
 
     args = parser.parse_args()
-    skird(tasks_file=args.path, config_name=args.type, find_bugs=args.bugs, find_features=args.no_features)
+    skird(tasks_file=args.path, config_name=args.type, find_bugs=args.bugs, find_features=args.no_features,
+          show_parentless=args.parentless)
