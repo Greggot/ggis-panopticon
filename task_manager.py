@@ -85,7 +85,8 @@ while True:
     if card_parent is None:
         while True:
             try:
-                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)",
+                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)\n"
+                                           "Или ее ID (тот, что после '#' под названием, вроде этого - 45906)",
                                            type=str)
                 if not card_parent.isspace():
                     break
