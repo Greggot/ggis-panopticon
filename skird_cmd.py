@@ -13,6 +13,7 @@ from card_creator_config import Card_creator_config
 from config_utils import check_and_prepare_configs_path
 import os.path
 
+from skird import create_cards_from_text_file_features, create_cards_from_text_file_bugs
 
 def output_planned_tasks(path: str) -> None:
     use_json = False
@@ -39,31 +40,6 @@ def output_planned_tasks(path: str) -> None:
         except KeyError:
             print("Неверный формат json-файла!")
             exit(1)
-
-
-def create_cards_from_text_file_features(session: Session, path: str, config: Card_creator_config) -> None:
-    for tasklist in parse_tasks_file(path):
-        story = card_from_types(session=session, type_ids={CardType.User_story, CardType.Enabler, CardType.Techdolg}, identificator=tasklist.story)
-        if story is None:
-            print(f'[WARNING] Не удалось отыскать карточку с номером {tasklist.story}')
-            continue
-        if story.is_late:
-            print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
-        for task in tasklist.tasks:
-            Card_creator(task, config, story, session)
-
-
-def create_cards_from_text_file_bugs(session: Session, path: str, config: Card_creator_config) -> None:
-    for tasklist in parse_tasks_file(path):
-        bug = card_from_types(session=session, type_ids={CardType.Bug}, identificator=tasklist.story)
-        if bug is None:
-            print(f'[WARNING] Не удалось отыскать карточку с номером {tasklist.story}')
-            continue
-        if bug.is_late:
-            print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
-        for task in tasklist.tasks:
-            Card_creator(task, config, bug, session)
-
 
 def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_group, def_config_name: str,
                          user: User = None):
