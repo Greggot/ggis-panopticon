@@ -3,33 +3,49 @@
 import json
 from kaiten.session import Session
 from kaiten.user import User
-from card_utils import user_stories, enablers, bugs, output_planned_tasks
+from card_utils import user_stories, enablers, bugs, output_planned_tasks, card_from_id
 from card_creator import Card_creator
 from card_creator_config import Card_creator_config
 from dev_tasks import parse_tasks_file
 from config_utils import check_and_prepare_configs_path
 
+def create_card_from_custom_id(tasklist) -> None:
+    story = card_from_id(session, tasklist.custom_id)
+    if story is None:
+        print(f'Cannot find story {tasklist.custom_id}')
+        return
+    for task in tasklist.tasks:
+        Card_creator(task, config, story, session)
+
 def create_cards_from_text_file_features(path: str, config: Card_creator_config) -> None:
     tasklists = parse_tasks_file(path)
-    for story in user_stories(session) + enablers(session):
-        for tasklist in tasklists:
-            if story.ggis_id != tasklist.story:
-                continue
-            if story.is_late:
-                print(f'[WARNING] Истек срок карточки: {story.title}, deadline: {story.deadline}')
-            for task in tasklist.tasks:
-                Card_creator(task, config, story, session)
+    story_enablers = user_stories(session) + enablers(session)
+
+    for tasklist in tasklists:
+        if tasklist.custom_id is None:
+            for story in story_enablers:
+                if story.ggis_id != tasklist.story:
+                    continue
+                for task in tasklist.tasks:
+                    Card_creator(task, config, story, session)
+        else:
+            create_card_from_custom_id(tasklist)
 
 
 def create_cards_from_text_file_bugs(path: str, config: Card_creator_config) -> None:
-    for bug in bugs(session):
-        for tasklist in parse_tasks_file(path):
-            if bug.ggis_id != tasklist.story:
-                continue
-            if bug.is_late:
-                print(f'[WARNING] Истек срок карточки: {bug.title}, deadline: {bug.deadline}')
-            for task in tasklist.tasks:
-                Card_creator(task, config, bug, session)
+    tasklists = parse_tasks_file(path)
+    story_enablers = bugs(session)
+
+    for tasklist in tasklists:
+        if tasklist.custom_id is None:
+            for story in story_enablers:
+                if story.ggis_id != tasklist.story:
+                    continue
+                for task in tasklist.tasks:
+                    Card_creator(task, config, story, session)
+        else:
+            create_card_from_custom_id(tasklist)
+
 
 
 if __name__ == "__main__":
