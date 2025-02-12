@@ -1,5 +1,6 @@
 #!/bin/python3
 
+from click import confirm
 from kaiten.session import Session
 import json
 
@@ -43,15 +44,17 @@ def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', fin
 
     output_planned_tasks(tasks_file)
 
-    split_filename = os.path.splitext(tasks_file)
-    if len(split_filename) >= 2:
-        if split_filename[1] == '.json':
-            create_cards_json(path=tasks_file, def_config_name=config_name, session=session, user=user)
-        elif split_filename[1] == '.yaml':
-            create_cards_yaml(path=tasks_file, def_config_name=config_name, session=session, user=user)
-        else:
-            config = Card_creator_config(config_name, user)
-            create_cards_simple(session=session, path=tasks_file, config=config, find_bugs=find_bugs, find_features=find_features)
+    if confirm(f'Создать карточки с конфигом {config_name} по-умолчанию?', default=True):
+        split_filename = os.path.splitext(tasks_file)
+        if len(split_filename) >= 2:
+            if split_filename[1] == '.json':
+                create_cards_json(path=tasks_file, def_config_name=config_name, session=session, user=user)
+                return
+            elif split_filename[1] == '.yaml':
+                create_cards_yaml(path=tasks_file, def_config_name=config_name, session=session, user=user)
+                return
+        config = Card_creator_config(config_name, user)
+        create_cards_simple(session=session, path=tasks_file, config=config, find_bugs=find_bugs, find_features=find_features)
 
 
 if __name__ == "__main__":
