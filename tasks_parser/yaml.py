@@ -11,7 +11,6 @@ from kaiten.card import CardType
 from card_creator import Card_creator
 from card_creator_config import Card_creator_config
 
-#TODO: Там, где continue, надо написать предупреждение об ошибке
 def create_cards(session: Session, path: str, def_config_name: str, user: User = None) -> None:
     if user is None:
         user = User(session)
@@ -23,10 +22,13 @@ def create_cards(session: Session, path: str, def_config_name: str, user: User =
         print("Parsing YAML failed.")
     for parent in parents:
         if 'ggis_id' not in parent and 'id' not in parent:
+            print("Вы не задали ни `ggis_is` ни `id` для родительской карточки. Она будет пропущена.")
             continue
         if 'tasks' not in parent:
+            print("Для карточки не обнаружено ни одной задачи (поле `tasks`) - пропущено")
             continue
         if len(parent['tasks']) == 0:
+            print("Для карточки не обнаружено ни одной задачи (поле `tasks`) - пропущено")
             continue
         types = set[CardType]()
         if 'type' in parent:
@@ -41,6 +43,7 @@ def create_cards(session: Session, path: str, def_config_name: str, user: User =
             elif type_upper == 'DB':
                 types.add(CardType.Techdolg)
         parent_card = None
+        find_by_ggis_id = False
         if 'id' in parent:
             try:
                 int_id = int(parent['id'])
@@ -51,8 +54,21 @@ def create_cards(session: Session, path: str, def_config_name: str, user: User =
         if parent_card is None and 'ggis_id' in parent:
             parent_card = card_from_types(session=session, type_ids=types, identificator=parent['ggis_id'],
                                           try_convert_ident_to_id=False)
+            find_by_ggis_id = True
+        if parent_card is None:
+            print(f'Не удалось найти родителя с конфигурацией {parent} - пропущено')
+            continue
+        if not find_by_ggis_id:
+            if len(types) > 0:
+                if parent_card.card_type not in types:
+                    parent_card_str = str(parent)
+                    if hasattr(parent_card, 'title'):
+                        parent_card_str = parent_card.title
+                    print(f'Карточка `{parent_card_str}` не соответствует указанному типу {parent['type']} - пропущено')
+                    continue
         for task in parent['tasks']:
             if 'name' not in task:
+                print('Не задано имя таски! Пропускаем')
                 continue
             config = def_config_name
             size = None
