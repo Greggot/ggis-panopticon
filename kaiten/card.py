@@ -6,18 +6,48 @@ import dateutil.parser
 from datetime import date
 from enum import Enum
 
+class CardType(Enum):
+    Feature = 4, ':F'
+    User_story = 5, ':US'
+    Bug = 7, ':BUG'
+    Enabler = 8, ':EN'
+    Techdolg = 9, ':DB'
+    Unknown = -1, ''
+
+    def __new__(cls, value, tag):
+        member = object.__new__(cls)
+        member._value_ = value
+        member.tag = tag
+        return member
+
+    def __int__(self):
+        return self.value
+
 class Card:
-    def __init__(self, card_json):
+    def __init__(self, card_json, dots_size: int = 3):
         self.__ggis_id__ = ''
         self.__data__ = card_json
         for key in card_json:
             setattr(self, key, card_json[key])
+        self.__card_type__ = CardType.Unknown
+        if hasattr(self, 'type_id'):
+            if self.type_id in CardType._value2member_map_:
+                self.__card_type__ = CardType(self.type_id)
+                self.ggis_id_from_title(self.__card_type__.tag, dots_size)
+
 
     @property
     def ggis_id(self):
         return self.__ggis_id__
 
+    @property
+    def card_type(self):
+        return self.__card_type__
+
     def ggis_id_from_title(self, tag, dots_size: int = 3):
+        if not hasattr(self, 'title'):
+            self.__ggis_id__ = ''
+            return
         ggis_id_pos = self.title.find(tag)
         if ggis_id_pos >= 0:
             dot_count = 0
@@ -53,19 +83,3 @@ class Card:
     @property
     def raw(self):
         return self.__data__
-    
-class CardType(Enum):
-    Feature = 4, ':F'
-    User_story = 5, ':US'
-    Bug = 7, ':BUG'
-    Enabler = 8, ':EN'
-    Techdolg = 9, ':DB'
-
-    def __new__(cls, value, tag):
-            member = object.__new__(cls)
-            member._value_ = value
-            member.tag = tag
-            return member
-    
-    def __int__(self):
-        return self.value
