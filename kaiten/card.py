@@ -36,11 +36,11 @@ class Card:
 
 
     @property
-    def ggis_id(self) -> CardType or None:
+    def ggis_id(self):
         return self.__ggis_id__
 
     @property
-    def card_type(self):
+    def card_type(self) -> CardType or None:
         return self.__card_type__
 
     def ggis_id_from_title(self, tag, dots_size: int = 3):
