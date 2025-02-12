@@ -12,7 +12,6 @@ class CardType(Enum):
     Bug = 7, ':BUG'
     Enabler = 8, ':EN'
     Techdolg = 9, ':DB'
-    Unknown = -1, ''
 
     def __new__(cls, value, tag):
         member = object.__new__(cls)
@@ -29,7 +28,7 @@ class Card:
         self.__data__ = card_json
         for key in card_json:
             setattr(self, key, card_json[key])
-        self.__card_type__ = CardType.Unknown
+        self.__card_type__ = None
         if hasattr(self, 'type_id'):
             if self.type_id in CardType._value2member_map_:
                 self.__card_type__ = CardType(self.type_id)
@@ -37,7 +36,7 @@ class Card:
 
 
     @property
-    def ggis_id(self):
+    def ggis_id(self) -> CardType or None:
         return self.__ggis_id__
 
     @property
