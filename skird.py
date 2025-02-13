@@ -1,8 +1,5 @@
 #!/bin/python3
 
-import sys
-import argparse
-from tui.main_screen import start_interactive as run_tui
 from kaiten.session_manager import get_session
 from utils.card_creator_config import Card_creator_config
 from utils.config_utils import check_and_prepare_configs_path
@@ -10,15 +7,6 @@ from tasks_parser.simple import create_cards_from_text_file_bugs, create_cards_f
     output_planned_tasks
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog=sys.argv[0], description='Скрипт для автоматизированного создания задач')
-    parser.add_argument('--tui', help='перейти в интерактивный режим', action='store_true')
-    args = parser.parse_args()
-    is_interactive = args.tui
-
-    if is_interactive :
-        run_tui('data/tasks.txt')
-        exit(0)
-
     check_and_prepare_configs_path()
     config_name = 'delivery'
     (user, session) = get_session('env/env.json')
