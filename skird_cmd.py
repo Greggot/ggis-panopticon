@@ -4,6 +4,7 @@ from typing import Set
 from tui.MainScreen import start_interactive as run_tui
 from kaiten.card import CardType
 from card_utils import card_from_types, card_from_id
+from kaiten.session_manager import get_session
 from kaiten.session import Session
 import json
 
@@ -149,11 +150,7 @@ def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', fin
         print(f"Не найден файл конфигурации с тасками ({tasks_file})")
         exit(1)
 
-    env_file = open('env/env.json')
-    env = json.load(env_file)
-
-    session = Session(server=env['kaiten_host'], token=env['kaiten_token'])
-    user = User(session)
+    (user, session) = get_session('env/env.json')
     print('Пользователь: ', user)
 
     if show_parentless:
@@ -202,15 +199,7 @@ if __name__ == "__main__":
     parser.add_argument('--no-features', action='store_false', help="не искать фичи (игнорируется с json-форматом)")
     parser.add_argument('--parentless', action='store_true', help="вывести список карточек без родителей")
 
-
     args = parser.parse_args()
-
-    is_interactive = args.tui
-
-    if is_interactive :
-        run_tui()
-        exit(0)
-
     skird_args = {
         "tasks_file"      : args.path,
         "config_name"     : args.type, 
@@ -218,5 +207,10 @@ if __name__ == "__main__":
         "find_features"   : args.no_features,
         "show_parentless" : args.parentless
     } 
+
+    is_interactive = args.tui
+    if is_interactive :
+        run_tui(skird_args.path)
+        exit(0)
 
     skird(**skird_args)

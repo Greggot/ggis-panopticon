@@ -4,8 +4,7 @@ import json
 import sys
 import argparse
 from tui.MainScreen import start_interactive as run_tui
-from kaiten.session import Session
-from kaiten.user import User
+from kaiten.session_manager import get_session
 from card_utils import user_stories, enablers, bugs, output_planned_tasks
 from card_creator import Card_creator
 from card_creator_config import Card_creator_config
@@ -42,15 +41,13 @@ if __name__ == "__main__":
     is_interactive = args.tui
 
     if is_interactive :
-        run_tui()
+        run_tui('data/tasks.txt')
         exit(0)
 
     check_and_prepare_configs_path()
     config_name = 'delivery'
-    env = json.load(open('env/env.json'))
+    (user, session) = get_session('env/env.json')
 
-    session = Session(server=env['kaiten_host'], token=env['kaiten_token'])
-    user = User(session)
     print('Пользователь: ', user)
 
     # output_column('Бэклог спринта')
