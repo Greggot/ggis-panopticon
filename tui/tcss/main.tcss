@@ -16,7 +16,11 @@ TextArea {
     margin-bottom: 1;
 }
 
-Button {
+ProgressPanel {
+    height: 10;
+}
+
+Button, ProgressBar {
     width: 100%;
     height: 100%;
 }

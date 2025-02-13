@@ -7,14 +7,24 @@ from utils.card_creator_config import Card_creator_config
 from kaiten.session_manager import get_session
 from tasks_parser.simple import create_cards_from_text_file_bugs, create_cards_from_text_file_features
 
-class ControlPanel(HorizontalGroup) :
-    # def on_button_pressed(self, event: Button.Pressed) -> None:
-    #     """Event handler called when a button is pressed."""
-    #     if event.button.id == "create":
-    #         self.add_class("created")
+class LogPanel(VerticalScroll):
+    def __init__(self):
+        super(LogPanel, self).__init__()
 
     def compose(self) -> ComposeResult:
-        """Create child widgets of a stopwatch."""
+        self.logger = TextArea(read_only = True)
+        yield self.logger
+
+class ProgressPanel(HorizontalGroup):
+    def __init__(self):
+        super(ProgressPanel, self).__init__()
+
+    def compose(self) -> ComposeResult:
+        self.progress_bar = ProgressBar()
+        yield self.progress_bar
+
+class ControlPanel(HorizontalGroup) :
+    def compose(self) -> ComposeResult:
         yield Button("Create cards", id="create", variant="success")
 
 class PanopticonApp(App):
