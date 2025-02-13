@@ -1,6 +1,6 @@
 from textual import events, on
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, TextArea, Button, ProgressBar
+from textual.widgets import Footer, Header, TextArea, Log, Button, ProgressBar
 from textual.containers import HorizontalGroup, VerticalScroll
 
 from utils.card_creator_config import Card_creator_config
@@ -12,7 +12,7 @@ class LogPanel(VerticalScroll):
         super(LogPanel, self).__init__()
 
     def compose(self) -> ComposeResult:
-        self.logger = TextArea(read_only = True)
+        self.logger = Log()
         yield self.logger
 
 class ProgressPanel(HorizontalGroup):
