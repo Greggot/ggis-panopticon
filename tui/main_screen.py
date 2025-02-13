@@ -64,8 +64,8 @@ class PanopticonApp(App):
         config_name = 'delivery'
         (user, session) = get_session('env/env.json')
         config = Card_creator_config(config_name, user)
-        # create_cards_from_text_file_bugs('data/tasks.txt', config)
-        create_cards_from_text_file_features(session=session, path='data/tasks.txt', config=config)
+        # create_cards_from_text_file_bugs(self.task_path, config)
+        create_cards_from_text_file_features(session=session, path=self.task_path, config=config)
         exit(0)
 
 def start_interactive(task_file) :
