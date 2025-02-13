@@ -1,6 +1,7 @@
 #!/bin/python3
 from typing import Set
 
+from tui.MainScreen import start_interactive as run_tui
 from kaiten.card import CardType
 from card_utils import card_from_types, card_from_id
 from kaiten.session import Session
@@ -207,6 +208,7 @@ if __name__ == "__main__":
     is_interactive = args.tui
 
     if is_interactive :
+        run_tui()
         exit(0)
 
     skird_args = {

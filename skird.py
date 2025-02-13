@@ -3,6 +3,7 @@
 import json
 import sys
 import argparse
+from tui.MainScreen import start_interactive as run_tui
 from kaiten.session import Session
 from kaiten.user import User
 from card_utils import user_stories, enablers, bugs, output_planned_tasks
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     is_interactive = args.tui
 
     if is_interactive :
+        run_tui()
         exit(0)
 
     check_and_prepare_configs_path()
