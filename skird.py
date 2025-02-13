@@ -1,6 +1,8 @@
 #!/bin/python3
 
 import json
+import sys
+import argparse
 from kaiten.session import Session
 from kaiten.user import User
 from card_utils import user_stories, enablers, bugs, output_planned_tasks
@@ -33,6 +35,14 @@ def create_cards_from_text_file_bugs(path: str, config: Card_creator_config) -> 
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog=sys.argv[0], description='Скрипт для автоматизированного создания задач')
+    parser.add_argument('--tui', help='перейти в интерактивный режим', action='store_true')
+    args = parser.parse_args()
+    is_interactive = args.tui
+
+    if is_interactive :
+        exit(0)
+
     check_and_prepare_configs_path()
     config_name = 'delivery'
     env = json.load(open('env/env.json'))

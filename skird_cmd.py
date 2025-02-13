@@ -194,6 +194,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--type', nargs='?',
                         help='выбор типа создаваемых тасков по-умолчанию', choices=['delivery', 'discovery'],
                         default=config_name)
+    parser.add_argument('--tui', help='перейти в интерактивный режим', action='store_true')
     parser.add_argument('-p', '--path', nargs='?', help='путь до файла с прописанными задачами',
                         default=tasks_file)
     parser.add_argument('-b', '--bugs', action='store_true', help="искать баги (игнорируется с json-форматом)")
@@ -202,5 +203,18 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
-    skird(tasks_file=args.path, config_name=args.type, find_bugs=args.bugs, find_features=args.no_features,
-          show_parentless=args.parentless)
+
+    is_interactive = args.tui
+
+    if is_interactive :
+        exit(0)
+
+    skird_args = {
+        "tasks_file"      : args.path,
+        "config_name"     : args.type, 
+        "find_bugs"       : args.bugs, 
+        "find_features"   : args.no_features,
+        "show_parentless" : args.parentless
+    } 
+
+    skird(**skird_args)
