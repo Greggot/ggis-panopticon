@@ -54,19 +54,22 @@ def identificator_is_id(ident: str) -> int | None:
         return None
     return None
 
-def card_from_id(session: Session, identificator: str) -> Card | None:
+def card_from_id(session: Session, identificator: int) -> Card | None:
+    res = card_id_request(session, identificator)
+    if res.status_code != 200:
+        return None
+    return Card(res.json())
+
+def card_from_id_str(session: Session, identificator: str) -> Card | None:
     real_id = identificator_is_id(identificator)
     if real_id is not None:
-        res = card_id_request(session, real_id)
-        if res.status_code != 200:
-            return None
-        return Card(res.json())
+        return card_from_id(session, real_id)
     return None
 
 def card_from_type(session: Session, type_id: CardType, identificator: str, try_convert_ident_to_id: bool = False) -> Card | None:
     tag = type_id.tag
     if try_convert_ident_to_id:
-        card = card_from_id(session, identificator)
+        card = card_from_id_str(session, identificator)
         if card is not None:
             if card.title.find(tag, 0) >= 0:
                 card.ggis_id_from_title(tag)
@@ -149,11 +152,6 @@ def output_stories_enablers(client):
     print('\nTechdolg: ')
     for card in techdolg(client):
         print('  ', card)
-
-
-def output_planned_tasks(dev_task_list: List[Dev_tasks]) -> None:
-    for task in dev_task_list:
-        print(task)
 
 async def gather_all_cards(session: Session, offset):
     return requests.get(session.cards_url, headers=session.headers, params={

@@ -1,125 +1,30 @@
 #!/bin/python3
-from typing import Set
 
-from kaiten.card import CardType
-from card_utils import card_from_types, card_from_id
+from click import confirm
 from kaiten.session import Session
 import json
 
 from kaiten.user import User
-from dev_tasks import parse_tasks_file
-from card_creator import Card_creator
 from card_creator_config import Card_creator_config
 from config_utils import check_and_prepare_configs_path
 import os.path
 
-from skird import create_cards_from_text_file_features, create_cards_from_text_file_bugs
+from tasks_parser.simple import create_cards as create_cards_simple, output_planned_tasks as output_planned_tasks_simple
+from tasks_parser.json import create_cards as create_cards_json, output_planned_tasks as output_planned_tasks_json
+from tasks_parser.yaml import create_cards as create_cards_yaml, output_planned_tasks as output_planned_tasks_yaml
 
 def output_planned_tasks(path: str) -> None:
-    use_json = False
     split_filename = os.path.splitext(path)
     if len(split_filename) >= 2:
         if split_filename[1] == '.json':
-            use_json = True
-    if not use_json:
-        for task in parse_tasks_file(path):
-            print(task)
-    else:
-        with open(path) as f:
-            json_tasks = json.load(f)
-        try:
-            for type in json_tasks:
-                for parent in json_tasks[type]:
-                    for task in json_tasks[type][parent]:
-                        if "config" not in task:
-                            task["config"] = "по-умолчанию"
-                        if "size" not in task:
-                            task["size"] = "по умолчанию из кофигурации"
-                        print(
-                            f"{type} {parent} '{task['name']}' с кофигурацей {task['config']} cо временем {task['size']}")
-        except KeyError:
-            print("Неверный формат json-файла!")
-            exit(1)
-
-def json_parsing_parents(session: Session, types: Set[CardType], json_tasks_group, def_config_name: str,
-                         user: User = None):
-    if user is None:
-        user = User(session)
-
-    for parent_id in json_tasks_group:
-        if len(types) == 0 or len(types) >= len(CardType):
-            parent_card = card_from_id(session=session,identificator=parent_id)
-            if parent_card is None:
-                parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id)
+            output_planned_tasks_json(path)
+        elif split_filename[1] == '.yaml':
+            output_planned_tasks_yaml(path)
         else:
-            parent_card = card_from_types(session=session, type_ids=types, identificator=parent_id,
-                                          try_convert_ident_to_id=True)
-        if parent_card is None:
-            print(f'[WARNING] Не удалось отыскать карточку с номером {parent_id}')
-            continue
-        if parent_card.is_late:
-            print(f'[WARNING] Истек срок карточки: {parent_card.title}, deadline: {parent_card.deadline}')
-        for task in json_tasks_group[parent_id]:
-            config = def_config_name
-            size = None
-            if "config" in task:
-                config = task["config"]
-            if "size" in task:
-                size = task["size"]
-            Card_creator(task["name"], Card_creator_config(config, user, size), parent_card, session)
-
-
-def create_cards_from_json(session: Session, path: str, def_config_name: str, user: User = None) -> None:
-    if user is None:
-        user = User(session)
-
-    with open(path) as f:
-        json_tasks = json.load(f)
-    try:
-        if "ALL" in json_tasks:
-            if len(json_tasks["ALL"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.User_story, CardType.Enabler, CardType.Bug, CardType.Techdolg},
-                                     json_tasks_group=json_tasks["ALL"],
-                                     def_config_name=def_config_name)
-        if "US-EN" in json_tasks:
-            if len(json_tasks["US-EN"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.User_story, CardType.Enabler},
-                                     json_tasks_group=json_tasks["US-EN"],
-                                     def_config_name=def_config_name)
-        if "BUG" in json_tasks:
-            if len(json_tasks["BUG"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.Bug},
-                                     json_tasks_group=json_tasks["BUG"],
-                                     def_config_name=def_config_name)
-        if "US" in json_tasks:
-            if len(json_tasks["US"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.User_story},
-                                     json_tasks_group=json_tasks["US"],
-                                     def_config_name=def_config_name)
-        if "EN" in json_tasks:
-            if len(json_tasks["EN"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.Enabler},
-                                     json_tasks_group=json_tasks["EN"],
-                                     def_config_name=def_config_name)
-        if "DB" in json_tasks:
-            if len(json_tasks["DB"]) > 0:
-                json_parsing_parents(session=session, user=user,
-                                     types={CardType.Techdolg},
-                                     json_tasks_group=json_tasks["DB"],
-                                     def_config_name=def_config_name)
-    except KeyError:
-        print("Неверный формат json-файла!")
-        exit(1)
-
+            output_planned_tasks_simple(path)
 
 def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', find_bugs: bool = False,
           find_features: bool = False, show_parentless: bool = False):
-    import click
     if not os.path.isfile(tasks_file):
         print(f"Не найден файл конфигурации с тасками ({tasks_file})")
         exit(1)
@@ -137,22 +42,19 @@ def skird(config_name: str = 'delivery', tasks_file: str = 'data/tasks.txt', fin
             print('  ', card)
         print('}')
 
-    use_json = False
-    split_filename = os.path.splitext(tasks_file)
-    if len(split_filename) >= 2:
-        if split_filename[1] == '.json':
-            use_json = True
-
     output_planned_tasks(tasks_file)
-    if click.confirm(f'Создать карточки с конфигом {config_name} по-умолчанию?', default=True):
-        if not use_json:
-            config = Card_creator_config(config_name, user)
-            if find_bugs:
-                create_cards_from_text_file_bugs(path=tasks_file, config=config, session=session)
-            if find_features:
-                create_cards_from_text_file_features(path=tasks_file, config=config, session=session)
-        else:
-            create_cards_from_json(path=tasks_file, def_config_name=config_name, session=session, user=user)
+
+    if confirm(f'Создать карточки с конфигом {config_name} по-умолчанию?', default=True):
+        split_filename = os.path.splitext(tasks_file)
+        if len(split_filename) >= 2:
+            if split_filename[1] == '.json':
+                create_cards_json(path=tasks_file, def_config_name=config_name, session=session, user=user)
+                return
+            elif split_filename[1] == '.yaml':
+                create_cards_yaml(path=tasks_file, def_config_name=config_name, session=session, user=user)
+                return
+        config = Card_creator_config(config_name, user)
+        create_cards_simple(session=session, path=tasks_file, config=config, find_bugs=find_bugs, find_features=find_features)
 
 
 if __name__ == "__main__":
