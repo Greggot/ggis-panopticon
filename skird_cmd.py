@@ -3,10 +3,6 @@
 from click import confirm
 from kaiten.session_manager import get_session
 from tui.MainScreen import start_interactive as run_tui
-from kaiten.session import Session
-import json
-
-from kaiten.user import User
 from utils.card_creator_config import Card_creator_config
 from utils.config_utils import check_and_prepare_configs_path
 import os.path

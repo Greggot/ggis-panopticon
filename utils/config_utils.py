@@ -1,7 +1,8 @@
 import os
+from pathlib import Path
 
 def existence_configs_check(
-        configs_target_path: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'env', 'skird_config')),
+        configs_target_path: str = os.path.abspath(os.path.join(Path.cwd(), 'env', 'skird_config')),
         silent: bool = True) -> bool:
     if os.path.isdir(configs_target_path):
         if len(os.listdir(configs_target_path)) == 0:
@@ -15,7 +16,7 @@ def existence_configs_check(
 
 
 def prepare_configs_path(
-        configs_target_path: str = os.path.abspath(os.path.join(os.path.dirname(__file__), 'env', 'skird_config')),
+        configs_target_path: str = os.path.abspath(os.path.join(Path.cwd(), 'env', 'skird_config')),
         overwrite: bool = False) -> bool:
     if os.path.isdir(configs_target_path):
         if overwrite:
@@ -30,7 +31,7 @@ def prepare_configs_path(
 
     try:
         import shutil
-        shutil.copytree(os.path.abspath(os.path.join(os.path.dirname(__file__), 'json', 'skird_config')),
+        shutil.copytree(os.path.abspath(os.path.join(Path.cwd(), 'json', 'skird_config')),
                         configs_target_path)
         return True
     except Exception as e:
@@ -42,6 +43,6 @@ def check_and_prepare_configs_path() -> None:
         if not prepare_configs_path():
             print("Пути конфигураций для карточек не найдены, а создать их автоматически не вышло")
             print("Возможно, отсутствует модуль 'shutil'")
-            print(f"Вы можете руками скопировать {os.path.join(os.path.dirname(__file__), 'json', 'skird_config')} в "
-                  f"{os.path.join(os.path.dirname(__file__), 'env', 'skird_config')} ")
+            print(f"Вы можете руками скопировать {os.path.join(Path.cwd(), 'json', 'skird_config')} в "
+                  f"{os.path.join(Path.cwd(), 'env', 'skird_config')} ")
             exit(1)

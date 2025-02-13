@@ -1,12 +1,9 @@
 #!/bin/python3
 
-import json
 import sys
 import argparse
 from tui.MainScreen import start_interactive as run_tui
 from kaiten.session_manager import get_session
-from kaiten.session import Session
-from kaiten.user import User
 from utils.card_creator_config import Card_creator_config
 from utils.config_utils import check_and_prepare_configs_path
 from tasks_parser.simple import create_cards_from_text_file_bugs, create_cards_from_text_file_features, \

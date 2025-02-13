@@ -3,6 +3,10 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, TextArea, Button, ProgressBar
 from textual.containers import HorizontalGroup, VerticalScroll
 
+from utils.card_creator_config import Card_creator_config
+from kaiten.session_manager import get_session
+from tasks_parser.simple import create_cards_from_text_file_bugs, create_cards_from_text_file_features
+
 class ControlPanel(HorizontalGroup) :
     # def on_button_pressed(self, event: Button.Pressed) -> None:
     #     """Event handler called when a button is pressed."""
@@ -34,7 +38,11 @@ class PanopticonApp(App):
     @on(Button.Pressed, "#create")
     def pressed_create(self) -> None:
         """Pressed Create"""
-        
+        config_name = 'delivery'
+        (user, session) = get_session('env/env.json')
+        config = Card_creator_config(config_name, user)
+        # create_cards_from_text_file_bugs('data/tasks.txt', config)
+        create_cards_from_text_file_features(session=session, path='data/tasks.txt', config=config)
         pass
 
 def start_interactive(tasks) :
