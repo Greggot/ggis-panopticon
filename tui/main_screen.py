@@ -21,15 +21,23 @@ class PanopticonApp(App):
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
     CSS_PATH = "tcss/main.tcss"
 
-    def __init__(self, content):
+    def __init__(self, task_path):
         super(PanopticonApp, self).__init__()
-        self.content = content
+        
+        self.task_path = task_path
+
+        with open(task_path) as task_file:
+            self.content = task_file.read()
 
     def compose(self) -> ComposeResult:
-        yield Header()
-        yield TextArea(text = self.content)
-        yield ControlPanel()
-        yield Footer()
+        self.header = Header()
+        self.textarea = TextArea(text = self.content)
+        self.control_panel = ControlPanel()
+        self.footer = Footer()
+        yield self.header
+        yield self.textarea
+        yield self.control_panel
+        yield self.footer
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
@@ -38,6 +46,11 @@ class PanopticonApp(App):
     @on(Button.Pressed, "#create")
     def pressed_create(self) -> None:
         """Pressed Create"""
+        content = self.textarea.text
+
+        with open(self.task_path, "w") as file:
+            file.write(content)
+        
         config_name = 'delivery'
         (user, session) = get_session('env/env.json')
         config = Card_creator_config(config_name, user)
@@ -45,13 +58,8 @@ class PanopticonApp(App):
         create_cards_from_text_file_features(session=session, path='data/tasks.txt', config=config)
         exit(0)
 
-def start_interactive(tasks) :
-    data = ""
-
-    with open(tasks) as task_file:
-        data = task_file.read()
-
-    app = PanopticonApp(data)
+def start_interactive(task_file) :
+    app = PanopticonApp(task_file)
     app.run()
 
 if __name__ == "__main__":
