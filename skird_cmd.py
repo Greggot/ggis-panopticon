@@ -7,8 +7,8 @@ from kaiten.session import Session
 import json
 
 from kaiten.user import User
-from card_creator_config import Card_creator_config
-from config_utils import check_and_prepare_configs_path
+from utils.card_creator_config import Card_creator_config
+from utils.config_utils import check_and_prepare_configs_path
 import os.path
 
 from tasks_parser.simple import create_cards as create_cards_simple, output_planned_tasks as output_planned_tasks_simple
