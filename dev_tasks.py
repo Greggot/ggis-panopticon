@@ -16,6 +16,9 @@ class Dev_tasks:
     def tasks(self) -> Iterable[str]:
         return iter(self.tasklist)
 
+""" Считать таски по формату: если первый символ строки не Tab, то считать это номером стори,
+    иначе - записать текст в список задач под последней попавшейся истории.
+"""
 def parse_tasks_file(path: str) -> List[Dev_tasks]:
     file1 = open(path, encoding='utf-8', mode='r')
     Lines = file1.readlines()
@@ -25,8 +28,11 @@ def parse_tasks_file(path: str) -> List[Dev_tasks]:
     story = ''
     
     for line in Lines:
+        linestrip = line.strip()
+        if len(linestrip) == 0:
+            continue
         if line[0] in ' \t':
-            tasklist.append(line.strip())
+            tasklist.append(linestrip)
         else:
             if tasklist:
                 tasks.append(Dev_tasks(story, tasklist))

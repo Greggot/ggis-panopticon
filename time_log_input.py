@@ -1,7 +1,6 @@
 
 from kaiten.session import Session
-from datetime import date, timedelta, datetime
-from typing import Iterable
+from datetime import timedelta, datetime
 
 import requests
 

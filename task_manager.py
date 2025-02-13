@@ -6,7 +6,7 @@ import argparse
 import click
 import os
 
-from helper import check_and_prepare_configs_path
+from config_utils import check_and_prepare_configs_path
 
 check_and_prepare_configs_path()
 
@@ -71,16 +71,22 @@ while True:
                     break
 
     if card_type is None:
-        if click.confirm('Вы хотите создать дочернюю карточку для бага?', default=False):
-            card_type = "BUG"
-        else:
-            card_type = "US-EN"
-            print("Окей, будем создавать карточку для US/EN")
+        card_types = ["ALL", "US-EN", "BUG", "US", "EN"]
+        print("1. Любой тип (мне лень вспоминать)")
+        print("2. US или EN")
+        print("3. BUG")
+        print("4. US")
+        print("5. EN")
+        print("0. Выйти")
+        user_select = selectNum(maximum=5, text="Выберите тип родителя для вашей задачи", default=1)
+        card_type = card_types[user_select - 1]
+        print(f"Окей, будем создавать карточку для {card_type}")
 
     if card_parent is None:
         while True:
             try:
-                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)",
+                card_parent = click.prompt("Введите идентификатор карточки родителя (к примеру, 81.23468 или 49.9)\n"
+                                           "Или ее ID (тот, что после '#' под названием, вроде этого - 45906)",
                                            type=str)
                 if not card_parent.isspace():
                     break
@@ -140,4 +146,5 @@ while True:
 
 if click.confirm('Запустить скрипт создания новых карточек с Вашей конфигурацией?', default=True):
     import skird_cmd
+
     skird_cmd.skird(tasks_file=tasks_file)
