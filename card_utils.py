@@ -153,11 +153,6 @@ def output_stories_enablers(client):
     for card in techdolg(client):
         print('  ', card)
 
-
-def output_planned_tasks(dev_task_list: List[Dev_tasks]) -> None:
-    for task in dev_task_list:
-        print(task)
-
 async def gather_all_cards(session: Session, offset):
     return requests.get(session.cards_url, headers=session.headers, params={
         "offset": offset
