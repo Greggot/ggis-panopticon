@@ -1,6 +1,6 @@
 from kaiten.card import Card
 from kaiten.session import Session
-from card_creator_config import Card_creator_config
+from utils.card_creator_config import Card_creator_config
 import requests
 from enum import Enum, IntEnum
 

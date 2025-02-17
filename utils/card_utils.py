@@ -1,11 +1,10 @@
 import requests
 import asyncio
 from requests import Response
+from typing import List, Iterable, Set
 from kaiten.card import Card, CardType
 from kaiten.session import Session
-from typing import List, Iterable, Set
 from kaiten.user import User
-from dev_tasks import Dev_tasks
 
 """ type_id - тип карточек (сторя, энейблер...)
     offset - сдвиг, если требуется запросить >100 карточек

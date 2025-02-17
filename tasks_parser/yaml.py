@@ -6,10 +6,10 @@ except ImportError:
 
 from kaiten.session import Session
 from kaiten.user import User
-from card_utils import card_from_id, card_from_types
+from utils.card_utils import card_from_id, card_from_types
 from kaiten.card import CardType
-from card_creator import Card_creator
-from card_creator_config import Card_creator_config
+from utils.card_creator import Card_creator
+from utils.card_creator_config import Card_creator_config
 
 def create_cards(session: Session, path: str, def_config_name: str, user: User = None) -> None:
     if user is None:

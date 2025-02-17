@@ -1,9 +1,8 @@
 #!/bin/python3
 
-from kaiten.session import Session
 import json
 
-from kaiten.user import User
+from kaiten.session_manager import get_session
 from kaiten.time_log import time_logs_from_card
 from time_log_input import Time_log_input
 
@@ -20,8 +19,7 @@ if __name__ == "__main__":
     env_file = open('env/env.json')
     env = json.load(env_file)
 
-    session = Session(server = env['kaiten_host'], token = env['kaiten_token'])
-    user = User(session)
+    (user, session) = get_session('env/env.json')
     print('Пользователь: ', user)
 
     auto_time_log_file = open('env/auto_time_log.json')

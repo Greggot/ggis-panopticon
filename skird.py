@@ -1,20 +1,16 @@
 #!/bin/python3
 
-import json
-from kaiten.session import Session
-from kaiten.user import User
-from card_creator_config import Card_creator_config
-from config_utils import check_and_prepare_configs_path
+from kaiten.session_manager import get_session
+from utils.card_creator_config import Card_creator_config
+from utils.config_utils import check_and_prepare_configs_path
 from tasks_parser.simple import create_cards_from_text_file_bugs, create_cards_from_text_file_features, \
     output_planned_tasks
 
 if __name__ == "__main__":
     check_and_prepare_configs_path()
     config_name = 'delivery'
-    env = json.load(open('env/env.json'))
+    (user, session) = get_session('env/env.json')
 
-    session = Session(server=env['kaiten_host'], token=env['kaiten_token'])
-    user = User(session)
     print('Пользователь: ', user)
 
     # output_column('Бэклог спринта')

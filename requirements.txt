@@ -1,0 +1,6 @@
+python-dateutil
+requests
+argparse
+click
+textual
+pyyaml

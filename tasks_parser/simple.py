@@ -1,7 +1,7 @@
-from card_creator import Card_creator
-from card_creator_config import Card_creator_config
-from card_utils import card_from_types, card_from_id
-from dev_tasks import parse_tasks_file
+from utils.card_creator import Card_creator
+from utils.card_creator_config import Card_creator_config
+from utils.card_utils import card_from_types, card_from_id
+from utils.dev_tasks import parse_tasks_file
 from kaiten.card import CardType
 from kaiten.session import Session
 
