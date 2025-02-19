@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     is_interactive = args.tui
     if is_interactive :
-        run_tui(skird_args.path)
+        run_tui(args.path)
         exit(0)
 
     skird(**skird_args)
