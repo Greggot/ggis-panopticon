@@ -6,6 +6,9 @@ from kaiten.session_manager import get_session
 from kaiten.time_log import time_logs_from_card
 from time_log_input import Time_log_input
 
+from kaiten.user import User
+from kaiten.session import Session
+
 def check_spent_time(user: User, session: Session):
     overall_minutes = 0
     for card in user.card_list():
