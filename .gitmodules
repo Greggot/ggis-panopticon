@@ -1,0 +1,3 @@
+[submodule "go-kunstkammer"]
+	path = go-kunstkammer
+	url = https://github.com/Moneypoolator/go-kunstkammer.git
