@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
-void print(const String_view* string_view)
+void print_string_view(const String_view* string_view)
 {
-    printf("%.*s", (int)string_view->size, string_view->ptr);
+    for(size_t i = 0; i < string_view->size; ++i) {
+        printf("%c", string_view->ptr[i]);
+    }
 }
 
 String_view create_string_view(const char* data)

@@ -8,5 +8,5 @@ typedef struct {
     size_t size;
 } String_view;
 
-void print(const String_view*);
+void print_string_view(const String_view*);
 String_view create_string_view(const char*);

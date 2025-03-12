@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 project(panopticon_c C)
 
-set(SOURCES 
-    dev_tasks.c
-    env.c
-    main.c
-    skird_config.c
-    string_view.c
-    string.c
-    user.c
-)
+# set(SOURCES 
+#     dev_tasks.c
+#     env.c
+#     main.c
+#     skird_config.c
+#     string_view.c
+#     string.c
+#     user.c
+# )
+FILE(GLOB SOURCES "src/*.c")
 add_executable(panopticon_c ${SOURCES})
 
 target_compile_options(panopticon_c PRIVATE 

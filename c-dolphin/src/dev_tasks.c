@@ -1,4 +1,6 @@
 #include "dev_tasks.h"
+#include "string_view.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -52,10 +54,15 @@ void add_task(Story* story, const String_view* task)
 
 void output_story(const Story* story)
 {
-    printf("Story \"%.*s\"\n", (int)story->parent_story.size, story->parent_story.ptr);
+    printf("Story \"");
+    print_string_view(&story->parent_story);
+    printf("\"\n");
+
     Task_list* list = story->tasks_head;
     while (list != NULL) {
-        printf("\t%.*s\n", (int)list->task.size, list->task.ptr);
+        printf("\t");
+        print_string_view(&list->task);
+        printf("\n");
         list = list->next;
     }
 }
@@ -97,13 +104,13 @@ const char* type_to_string(String_type type)
 void print_with_type(const String_view* string_view)
 {
     printf("[%s] ", type_to_string(string_type(string_view)));
-    print(string_view);
+    print_string_view(string_view);
     printf("\n");
 }
 
 void read_file(Dev_task_list* dev, size_t* size, const char* path)
 {
-    FILE* file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     if (file == NULL) {
         printf("Cannot read file \"%s\"", path);
         return;
@@ -119,11 +126,16 @@ void read_file(Dev_task_list* dev, size_t* size, const char* path)
         return;
     }
 
-    fread(dev->file_data, *size, 1, file);
+    fread(dev->file_data, 1, *size, file);
     fclose(file);
 }
 
-/// -------------------------------- PUBLIC -------------------------------- /// 
+int char_is_correct(char c)
+{
+    return c != '\n' || c != 0;
+}
+
+/// -------------------------------- PUBLIC -------------------------------- ///
 
 void clean_task_list(Dev_task_list* dev)
 {
@@ -157,16 +169,17 @@ Dev_task_list parse_task_list(const char* path)
 
     char* begin_ptr = dev.file_data;
     char* end_ptr = dev.file_data;
+
     for (size_t i = 0; i < size;)
     {
-        while (*end_ptr != '\n' && i < size) {
+        while (i < size && char_is_correct(*end_ptr)) {
             ++end_ptr;
             ++i;
         }
 
         String_view string_view = {
             .ptr = begin_ptr,
-            .size = end_ptr - begin_ptr
+            .size = end_ptr - begin_ptr - 1
         };
         begin_ptr = ++end_ptr;
 
@@ -186,6 +199,7 @@ Dev_task_list parse_task_list(const char* path)
                 break;
         }
     }
+
     if (story.tasks_head != NULL) {
         add_story(&dev, &story);
     }
