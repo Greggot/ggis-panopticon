@@ -1,97 +1,13 @@
 #include "card_creation.h"
 #include "card.h"
 #include "kaiten_endpoint.h"
+#include "requests.h"
 #include "string.h"
 #include "string_view.h"
 #include <cjson/cJSON.h>
-#include <curl/curl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-CURL* curl;
-
-/// @brief Собирает все части ответа сервера в одну строку по string_ptr
-size_t post_callback(void* contents, size_t size, size_t nmemb, void* string_ptr)
-{
-    static long response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    if (response_code != 200) {
-        printf("Error responce code: [%li]%s\n", response_code, (char*)contents);
-        return size * nmemb;
-    }
-
-    String* string = (String*)string_ptr;
-    String_view chunk = {
-        .ptr = (char*)contents,
-        .size = nmemb
-    };
-    add_string_to_string_view(string, &chunk);
-    return size * nmemb;
-}
-
-size_t status_callback(void* contents, size_t size, size_t nmemb, void* unused)
-{
-    (void)unused;
-    static long response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    if (response_code != 200) {
-        printf("Error responce code: [%li] %s\n", response_code, (char*)contents);
-    }
-    return size * nmemb;
-}
-
-String request_post(const Env* env, const String* url, const String* data)
-{
-    String overall_json = { .ptr = NULL, .size = 0 };
-
-    curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, post_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &overall_json);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->ptr);
-
-    struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, "Accept: application/json");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_perform(curl);
-    curl_slist_free_all(headers);
-
-    return overall_json;
-}
-
-void request_post_no_answer(const Env* env, const String* url, const String* data)
-{
-    curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, status_callback);
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->ptr);
-
-    struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, "Accept: application/json");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_perform(curl);
-    curl_slist_free_all(headers);
-}
-
-void request_patch(const Env* env, const String* url, const String* data)
-{
-    curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, status_callback);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->ptr);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-
-    struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, "Accept: application/json");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_perform(curl);
-    curl_slist_free_all(headers);
-}
 
 String post_card_create_data(const Create_paramters* creator, const User* user)
 {
@@ -129,7 +45,7 @@ String ggis_card_title(const Card* card)
         "131.13", card->id, card->title.ptr);
 
     String new_title;
-    new_title.size += length + 1;
+    new_title.size = length + 1;
     new_title.ptr = (char*)malloc(new_title.size);
 
     snprintf(new_title.ptr, length + 1, format,
@@ -209,9 +125,8 @@ static void post_card_add_child(const Env* env, const Card* parent, const Card* 
     delete_string(&children_url);
 }
 
-void create_card(CURL* in_curl, const Env* env, const User* user, const Create_paramters* creator)
+void create_card(const Env* env, const User* user, const Create_paramters* creator)
 {
-    curl = in_curl;
     String url = kaiten_cards_url(env);
     String post_data = post_card_create_data(creator, user);
     String answer = request_post(env, &url, &post_data);
@@ -228,8 +143,8 @@ void create_card(CURL* in_curl, const Env* env, const User* user, const Create_p
     patch_card_title(env, &created_card);
     printf("Created card: %s/%u\n", env->kaiten_host.ptr, created_card.id);
 
+    delete_string(&created_card.title);
     delete_string(&post_data);
     delete_string(&answer);
-    delete_string(&created_card.title);
     delete_string(&url);
 }

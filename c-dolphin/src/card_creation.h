@@ -4,7 +4,6 @@
 #include "skird_config.h"
 #include "string_view.h"
 #include "user.h"
-#include <curl/curl.h>
 
 typedef struct {
     String_view title;
@@ -19,4 +18,4 @@ typedef enum {
     OWNER = 2,
 } Responsibility;
 
-void create_card(CURL* curl, const Env* env, const User*, const Create_paramters* creator);
+void create_card(const Env* env, const User*, const Create_paramters* creator);

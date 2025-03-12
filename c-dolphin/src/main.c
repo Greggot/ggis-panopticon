@@ -3,6 +3,7 @@
 #include "dev_tasks.h"
 #include "env.h"
 #include "kaiten_endpoint.h"
+#include "requests.h"
 #include "skird_config.h"
 #include "string.h"
 #include "string_view.h"
@@ -17,48 +18,6 @@ typedef enum {
     ARCHIVED,
     ACTIVE
 } Card_condition;
-
-static CURL* curl;
-
-/// @brief Собирает все части ответа сервера в одну строку по string_ptr
-size_t get_callback(void* contents, size_t size, size_t nmemb, void* string_ptr)
-{
-    static long response_code;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-    if (response_code != 200) {
-        printf("Error responce code: [%li]%s\n", response_code, (char*)contents);
-        return size * nmemb;
-    }
-
-    String* string = (String*)string_ptr;
-    String_view chunk = {
-        .ptr = (char*)contents,
-        .size = nmemb
-    };
-    add_string_to_string_view(string, &chunk);
-    return size * nmemb;
-}
-
-/// @return JSON-ответ на GET-запрос по url
-/// @param env хранит токен аутентификации
-String request_get(const Env* env, const String* url)
-{
-    String overall_json = { .ptr = NULL, .size = 0 };
-
-    curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, get_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &overall_json);
-
-    struct curl_slist* headers = NULL;
-    headers = curl_slist_append(headers, "Accept: application/json");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_perform(curl);
-    curl_slist_free_all(headers);
-
-    return overall_json;
-}
 
 User request_current_user(const Env* env)
 {
@@ -84,8 +43,6 @@ Card* request_current_card(const Env* env, const Card_request* request)
 
     Card* result = NULL;
     int found = 0;
-
-    printf("%s\n", answer.ptr);
 
     for (int i = 0; i < card_array.size && !found; ++i) {
         Card* card = &card_array.card_ptr[i];
@@ -162,8 +119,7 @@ int main(void)
 
     Dev_task_list dev = parse_task_list("data.txt");
 
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl = curl_easy_init();
+    requests_init();
 
     String tags[2] = { create_string("ГГИС"), create_string("C++") };
 
@@ -180,15 +136,15 @@ int main(void)
         .tags_ptr = tags,
         .tags_size = sizeof(tags) / sizeof(String)
     };
-    create_card(curl, &env, &user, &create_parameters);
-    // skird(&env, &dev);
+    // create_card(&env, &user, &create_parameters);
+    skird(&env, &dev);
 
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    requests_deinit();
     clean_task_list(&dev);
     delete_skird_config(&skird_config);
     delete_env(&env);
     delete_user(&user);
+    delete_string(&parent_card.title);
 
     for (size_t i = 0; i < create_parameters.tags_size; ++i) {
         delete_string(&tags[i]);
