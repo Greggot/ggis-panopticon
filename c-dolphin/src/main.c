@@ -43,7 +43,6 @@ size_t get_callback(void* contents, size_t size, size_t nmemb, void* string_ptr)
 /// @param env хранит токен аутентификации
 String request_get(const Env* env, const String* url)
 {
-    String kaiten_auth = kaiten_auth_header(env);
     String overall_json = { .ptr = NULL, .size = 0 };
 
     curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
@@ -53,12 +52,11 @@ String request_get(const Env* env, const String* url)
     struct curl_slist* headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, kaiten_auth.ptr);
+    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_perform(curl);
     curl_slist_free_all(headers);
 
-    delete_string(&kaiten_auth);
     return overall_json;
 }
 

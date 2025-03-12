@@ -4,7 +4,7 @@
 
 typedef struct {
     String kaiten_host;
-    String kaiten_token;
+    String kaiten_auth;
 } Env;
 
 Env read_env(const char* path);

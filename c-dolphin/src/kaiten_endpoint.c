@@ -5,20 +5,13 @@
 
 String kaiten_current_user_url(const Env* env)
 {
-    return add_string_const(&env->kaiten_host, "/api/latest/users/current");
-}
-
-String kaiten_auth_header(const Env* env)
-{
-    String left = create_string("Authorization: Bearer ");
-    add_string_other(&left, &env->kaiten_token);
-    return left;
+    return add_string_const_char(&env->kaiten_host, "/api/latest/users/current");
 }
 
 /// [HOST]/api/latest/cards
 String kaiten_cards_url(const Env* env)
 {
-    return add_string_const(&env->kaiten_host, "/api/latest/cards");
+    return add_string_const_char(&env->kaiten_host, "/api/latest/cards");
 }
 
 String kaiten_card_url(const Env* env, int id)

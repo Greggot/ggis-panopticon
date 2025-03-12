@@ -3,7 +3,6 @@
 #include "string.h"
 
 String kaiten_current_user_url(const Env*);
-String kaiten_auth_header(const Env*);
 String kaiten_cards_url(const Env*);
 String kaiten_card_url(const Env*, int id);
 String kaiten_card_children_url(const Env*, int id);

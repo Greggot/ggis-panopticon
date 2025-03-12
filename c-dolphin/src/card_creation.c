@@ -31,6 +31,7 @@ size_t post_callback(void* contents, size_t size, size_t nmemb, void* string_ptr
 
 size_t status_callback(void* contents, size_t size, size_t nmemb, void* unused)
 {
+    (void)unused;
     static long response_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     if (response_code != 200) {
@@ -41,7 +42,6 @@ size_t status_callback(void* contents, size_t size, size_t nmemb, void* unused)
 
 String request_post(const Env* env, const String* url, const String* data)
 {
-    String kaiten_auth = kaiten_auth_header(env);
     String overall_json = { .ptr = NULL, .size = 0 };
 
     curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
@@ -53,19 +53,16 @@ String request_post(const Env* env, const String* url, const String* data)
     struct curl_slist* headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, kaiten_auth.ptr);
+    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_perform(curl);
     curl_slist_free_all(headers);
 
-    delete_string(&kaiten_auth);
     return overall_json;
 }
 
 void request_post_no_answer(const Env* env, const String* url, const String* data)
 {
-    String kaiten_auth = kaiten_auth_header(env);
-
     curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, status_callback);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -74,18 +71,14 @@ void request_post_no_answer(const Env* env, const String* url, const String* dat
     struct curl_slist* headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, kaiten_auth.ptr);
+    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_perform(curl);
     curl_slist_free_all(headers);
-
-    delete_string(&kaiten_auth);
 }
 
 void request_patch(const Env* env, const String* url, const String* data)
 {
-    String kaiten_auth = kaiten_auth_header(env);
-
     curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, status_callback);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data->ptr);
@@ -94,12 +87,10 @@ void request_patch(const Env* env, const String* url, const String* data)
     struct curl_slist* headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    headers = curl_slist_append(headers, kaiten_auth.ptr);
+    headers = curl_slist_append(headers, env->kaiten_auth.ptr);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_perform(curl);
     curl_slist_free_all(headers);
-
-    delete_string(&kaiten_auth);
 }
 
 String post_card_create_data(const Create_paramters* creator, const User* user)

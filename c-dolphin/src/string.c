@@ -39,7 +39,7 @@ void add_string(String* destination, const char* source)
 }
 
 /// @todo left empty case
-String add_string_const(const String* left, const char* right)
+String add_string_const_char(const String* left, const char* right)
 {
     const size_t curr_size = strlen(right);
     String new_string = {
@@ -49,6 +49,20 @@ String add_string_const(const String* left, const char* right)
     new_string.ptr = (char*)malloc(new_string.size + 1);
     mempcpy(new_string.ptr, left->ptr, left->size);
     mempcpy(new_string.ptr + left->size, right, curr_size);
+    new_string.ptr[new_string.size] = 0;
+    return new_string;
+}
+
+String add_const_char_string(const char* left, const String* right)
+{
+    const size_t curr_size = strlen(left);
+    String new_string = {
+        .size = right->size + curr_size
+    };
+
+    new_string.ptr = (char*)malloc(new_string.size + 1);
+    mempcpy(new_string.ptr, left, curr_size);
+    mempcpy(new_string.ptr + curr_size, right->ptr, right->size);
     new_string.ptr[new_string.size] = 0;
     return new_string;
 }
