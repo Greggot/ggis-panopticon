@@ -2,6 +2,7 @@
 #include "card_creation.h"
 #include "dev_tasks.h"
 #include "env.h"
+#include "ggis.h"
 #include "kaiten_endpoint.h"
 #include "requests.h"
 #include "skird_config.h"
@@ -99,8 +100,15 @@ void skird(const Env* env, const User* user, const Dev_task_list* dev, Create_pa
             parameters->parent = request_current_card(env, &parent_request);
         }
 
-        if (parameters->parent == NULL)
-            printf("[X] Search finished\n");
+        if (parameters->parent != NULL) {
+            printf("[X] Search finished, found with id {");
+            String_view parent_title_view = create_string_view(parameters->parent->title.ptr);
+            parameters->ggis_id = ggis_id_from_title(&parent_title_view);
+            print_string_view(&parameters->ggis_id);
+            printf("}\n");
+        } else {
+            parameters->ggis_id = story_ptr->story.parent_story;
+        }
 
         Task_list* task_ptr = story_ptr->story.tasks_head;
         while (task_ptr != NULL) {
@@ -118,65 +126,8 @@ void skird(const Env* env, const User* user, const Dev_task_list* dev, Create_pa
     }
 }
 
-/// @brief По моит эмпирическим догадкам все виды карточек содержат
-/// бред в начале, после которого ставится @b точка, после которой
-/// идет месиво из цифр-букв, других точек до тех пор, пока не появится
-/// @b пробел. Не знаю, почему пробел, но я нашел его во всех карточках,
-/// которые мне было не лень просмотреть (где-то штук 20)
-String_view ggis_id_from_title(String_view title)
-{
-    String_view string_view = {
-        .ptr = title.ptr,
-        .size = 0
-    };
-
-    while (*string_view.ptr != '.')
-        ++string_view.ptr;
-    ++string_view.ptr;
-    const char* ptr = string_view.ptr;
-    while (*ptr != ' ' && *ptr != 0) {
-        ++ptr;
-        ++string_view.size;
-    }
-    if (*ptr != 0)
-        --string_view.size;
-    return string_view;
-}
-
-#if GGIS_ID_TEST
-#include <ctype.h>
-void test_ggis_id_case(const char* text)
-{
-    String_view input = create_string_view(text);
-    String_view result = ggis_id_from_title(input);
-
-    printf("[");
-    print_string_view(&result);
-    printf("]\n");
-}
-
-void test_ggis_id(void)
-{
-    test_ggis_id_case("[CAD]:EN.98.1. Проработать концепцию работы инструмента");
-    test_ggis_id_case("[CAD]:BUG.110.44746. Не выполняется операция");
-    test_ggis_id_case("[CAD]:TS.76.36867.36935. Нет объема у некоторых ПМ после импорта на ");
-    test_ggis_id_case("[CAD]:BUG.56e.22.45353. СЦЕНАРИЙ 5.3. Отсут");
-    test_ggis_id_case("[CAD]:EN.40e.1. Созданий копий исходных полигона");
-    test_ggis_id_case("[CAD]:F.113. Модель поиска");
-    test_ggis_id_case("[CAD]:DB.x.45908. Есть возможность экспортировать в");
-    test_ggis_id_case("[CAD]:DB.x.4590");
-    test_ggis_id_case("DB..4590");
-    test_ggis_id_case("[CAD]:TS.E.47-4.41617. Отрефакторить получение данных");
-    test_ggis_id_case("[MGM]:TS.1.4.44460. fe-common-audit. Добавить поле Количество записей в выгрузке csv");
-}
-#endif
-
 int main(void)
 {
-#if GGIS_ID_TEST
-    test_ggis_id();
-#endif
-
     Env env = read_env("../env/env.json");
     Dev_task_list dev = parse_task_list("data.txt");
     Skird_config skird_config = read_skird_config("../env/skird_config/delivery.json");

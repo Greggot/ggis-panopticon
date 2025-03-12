@@ -37,19 +37,20 @@ String post_card_create_data(const Create_paramters* creator, const User* user)
 }
 
 /// @todo GGIS ID from parent card
-String ggis_card_title(const Card* card)
+String ggis_card_title(const Card* card, const String_view* ggis_id)
 {
-    static const char* format = "[CAD]:TS.%s.%u. %s";
+    static const char* format = "[CAD]:TS.%.*s.%u. %s";
     int length = snprintf(NULL, 0,
         format,
-        "131.13", card->id, card->title.ptr);
+        ggis_id->size, ggis_id->ptr, card->id, card->title.ptr);
 
     String new_title;
     new_title.size = length + 1;
     new_title.ptr = (char*)malloc(new_title.size);
 
-    snprintf(new_title.ptr, length + 1, format,
-        "131.13", card->id, card->title.ptr);
+    snprintf(new_title.ptr, length + 1,
+        format,
+        ggis_id->size, ggis_id->ptr, card->id, card->title.ptr);
     return new_title;
 }
 
@@ -93,10 +94,10 @@ static void post_card_add_tag(const Env* env, const String_view* tag, int id)
     delete_string(&json);
 }
 
-static void patch_card_title(const Env* env, const Card* card)
+static void patch_card_title(const Env* env, const Card* card, const String_view* ggis_id)
 {
     String card_url = kaiten_card_url(env, card->id);
-    String new_title = ggis_card_title(card);
+    String new_title = ggis_card_title(card, ggis_id);
     String json = json_single_string("title", &new_title);
     request_patch(env, &card_url, &json);
 
@@ -150,7 +151,7 @@ void create_card(const Env* env, const User* user, const Create_paramters* creat
     }
 
     post_card_add_user(env, &created_card, user);
-    patch_card_title(env, &created_card);
+    patch_card_title(env, &created_card, &creator->ggis_id);
     printf("Created card: %s/%u\n", env->kaiten_host.ptr, created_card.id);
 
     delete_string(&created_card.title);

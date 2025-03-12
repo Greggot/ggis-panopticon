@@ -11,6 +11,7 @@ typedef struct {
     const Skird_config* config;
     String_view* tags_ptr;
     size_t tags_size;
+    String_view ggis_id;
 } Create_paramters;
 
 typedef enum {
