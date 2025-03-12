@@ -34,3 +34,5 @@ message(STATUS "CURL_LIBRARIES: ${CURL_LIBRARIES}")
 
 target_link_libraries(panopticon_c PRIVATE ${CURL_LIBRARIES})
 target_link_libraries(panopticon_c PRIVATE ${CJSON_LIBRARIES})
+
+target_compile_definitions(panopticon_c PRIVATE GGIS_ID_TEST=0)
