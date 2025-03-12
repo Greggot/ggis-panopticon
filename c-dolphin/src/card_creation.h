@@ -16,7 +16,7 @@ typedef struct {
 
 typedef enum {
     MEMBER = 1,
-    OWNER = 1,
+    OWNER = 2,
 } Responsibility;
 
 void create_card(CURL* curl, const Env* env, const User*, const Create_paramters* creator);

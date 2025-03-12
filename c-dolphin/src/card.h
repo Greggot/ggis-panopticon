@@ -13,6 +13,7 @@ typedef enum {
 
 typedef struct {
     unsigned int id;
+    unsigned int sprint;
     String title;
     Card_type type;
 } Card;

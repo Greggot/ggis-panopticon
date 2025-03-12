@@ -87,6 +87,8 @@ Card* request_current_card(const Env* env, const Card_request* request)
     Card* result = NULL;
     int found = 0;
 
+    printf("%s\n", answer.ptr);
+
     for (int i = 0; i < card_array.size && !found; ++i) {
         Card* card = &card_array.card_ptr[i];
         found = string_contains_substring_view(&card->title, &request->query);
@@ -168,9 +170,14 @@ int main(void)
     String tags[2] = { create_string("ГГИС"), create_string("C++") };
 
     User user = request_current_user(&env);
+    Card parent_card = {
+        .id = 46276,
+        .sprint = 53,
+        .title = create_string("[CAD]:EN.131.13. Реализовать работу с компонентами связанности меша")
+    };
     Create_paramters create_parameters = {
         .title = create_string_view("Created by C"),
-        .parent = NULL,
+        .parent = &parent_card,
         .config = &skird_config,
         .tags_ptr = tags,
         .tags_size = sizeof(tags) / sizeof(String)

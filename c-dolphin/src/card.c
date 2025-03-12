@@ -13,7 +13,7 @@ String card_get_request(const Env* env, const Card_request* request)
         request->type_id, request->condition, request->offset,
         request->limit, (int)request->query.size, request->query.ptr);
 
-    String url = kaiten_card_url(env);
+    String url = kaiten_cards_url(env);
     const size_t prev_size = url.size;
     url.size += length + 1;
     url.ptr = realloc(url.ptr, url.size);
@@ -60,9 +60,12 @@ Card read_card(const char* data)
     cJSON* json = cJSON_Parse(data);
     cJSON* id = cJSON_GetObjectItem(json, "id");
     cJSON* title = cJSON_GetObjectItem(json, "title");
+    cJSON* properties = cJSON_GetObjectItem(json, "properties");
+    cJSON* sprint = cJSON_GetObjectItem(properties, "id_12");
 
     Card card = {
         .id = id->valueint,
+        .sprint = (sprint == NULL) ? 0 : sprint->valueint,
         .title = create_string(title->valuestring)
     };
     cJSON_Delete(json);
