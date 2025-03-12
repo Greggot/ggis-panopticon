@@ -7,9 +7,9 @@
 
 typedef struct {
     String_view title;
-    const Card* parent;
+    Card* parent;
     const Skird_config* config;
-    String* tags_ptr;
+    String_view* tags_ptr;
     size_t tags_size;
 } Create_paramters;
 

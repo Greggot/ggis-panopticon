@@ -63,6 +63,16 @@ static String json_single_string(const char* key, const String* value)
     return json;
 }
 
+static String json_single_string_view(const char* key, const String_view* value)
+{
+    cJSON* root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, key, value->ptr);
+    String json;
+    json.ptr = cJSON_Print(root);
+    cJSON_Delete(root);
+    return json;
+}
+
 static String json_single_int(const char* key, int value)
 {
     cJSON* root = cJSON_CreateObject();
@@ -73,9 +83,9 @@ static String json_single_int(const char* key, int value)
     return json;
 }
 
-static void post_card_add_tag(const Env* env, const String* tag, int id)
+static void post_card_add_tag(const Env* env, const String_view* tag, int id)
 {
-    String json = json_single_string("name", tag);
+    String json = json_single_string_view("name", tag);
     String tags_url = kaiten_card_tags_url(env, id);
     request_post_no_answer(env, &tags_url, &json);
 
