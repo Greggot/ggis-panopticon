@@ -1,4 +1,5 @@
 #pragma once
+#include "string.h"
 #include "string_view.h"
 
 typedef struct Task_list_t {
@@ -21,7 +22,7 @@ typedef struct Story_list_t {
 typedef struct {
     Story_list* head_story;
     Story_list* current_story;
-    char* file_data;
+    String file_data;
 } Dev_task_list;
 
 Dev_task_list parse_task_list(const char*);

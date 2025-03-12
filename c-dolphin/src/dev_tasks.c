@@ -1,4 +1,6 @@
 #include "dev_tasks.h"
+#include "file.h"
+#include "string.h"
 #include "string_view.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,28 +109,6 @@ void print_with_type(const String_view* string_view)
     printf("\n");
 }
 
-void read_file(Dev_task_list* dev, size_t* size, const char* path)
-{
-    FILE* file = fopen(path, "rb");
-    if (file == NULL) {
-        printf("Cannot read file \"%s\"", path);
-        return;
-    }
-
-    fseek(file, 0, SEEK_END);
-    *size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    dev->file_data = (char*)malloc(*size);
-    if (dev->file_data == NULL) {
-        printf("Cannot allocate text_data");
-        return;
-    }
-
-    fread(dev->file_data, 1, *size, file);
-    fclose(file);
-}
-
 /// -------------------------------- PUBLIC -------------------------------- ///
 
 void clean_task_list(Dev_task_list* dev)
@@ -146,40 +126,36 @@ void clean_task_list(Dev_task_list* dev)
         story = story->next;
         free(prev);
     }
-    free(dev->file_data);
+    delete_string(&dev->file_data);
 }
 
 Dev_task_list parse_task_list(const char* path)
 {
     Dev_task_list dev;
     dev.head_story = NULL;
-    dev.file_data = NULL;
-
-    size_t size = 0;
-    read_file(&dev, &size, path);
+    dev.file_data = read_file_string(path);    
 
     Story story;
     story.tasks_head = NULL;
 
-    char* begin_ptr = dev.file_data;
-    char* end_ptr = dev.file_data;
+    char* begin_ptr = dev.file_data.ptr;
+    char* end_ptr = dev.file_data.ptr;
 
-    for (size_t i = 0; i < size;)
+    for (size_t i = 0; i < dev.file_data.size;)
     {
-        if (*end_ptr == 0)
+        if (*end_ptr == 0) {
             break;
-        while (i < size && *end_ptr != '\n') {
+        }
+        while (i < dev.file_data.size && *(end_ptr) != '\n' && *(end_ptr + 1) != 0) {
             ++end_ptr;
-            if (*end_ptr == 0)
-                break;
             ++i;
         }
 
         String_view string_view = {
             .ptr = begin_ptr,
-            .size = end_ptr - begin_ptr - 1
+            .size = ++end_ptr - begin_ptr - 1
         };
-        begin_ptr = ++end_ptr;
+        begin_ptr = end_ptr;
 
         switch (string_type(&string_view)) {
             case PARENT:
