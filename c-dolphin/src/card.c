@@ -55,10 +55,39 @@ Card_array read_cards(const char* data)
     return card_array;
 }
 
+Card read_card(const char* data)
+{
+    cJSON* json = cJSON_Parse(data);
+    cJSON* id = cJSON_GetObjectItem(json, "id");
+    cJSON* title = cJSON_GetObjectItem(json, "title");
+
+    Card card = {
+        .id = id->valueint,
+        .title = create_string(title->valuestring)
+    };
+    cJSON_Delete(json);
+    return card;
+}
+
 void delete_card_array(Card_array* card_array)
 {
     for (int i = 0; i < card_array->size; ++i) {
         delete_string(&card_array->card_ptr[i].title);
     }
     free(card_array->card_ptr);
+}
+
+void deallocate_card(Card* card)
+{
+    delete_string(&card->title);
+    free(card);
+}
+
+Card* allocate_card_from_copy(const Card* card)
+{
+    Card* result = (Card*)malloc(sizeof(Card));
+    result->id = card->id;
+    result->type = card->type;
+    result->title = create_string(card->title.ptr);
+    return result;
 }

@@ -32,5 +32,8 @@ typedef struct {
 
 String card_get_request(const Env*, const Card_request*);
 Card_array read_cards(const char*);
+Card read_card(const char*);
 
 void delete_card_array(Card_array*);
+void deallocate_card(Card*);
+Card* allocate_card_from_copy(const Card*);

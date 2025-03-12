@@ -1,4 +1,5 @@
 #include "card.h"
+#include "card_creation.h"
 #include "dev_tasks.h"
 #include "env.h"
 #include "kaiten_endpoint.h"
@@ -9,6 +10,8 @@
 #include <cjson/cJSON.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef enum {
     ARCHIVED,
@@ -59,7 +62,7 @@ String request_get(const Env* env, const String* url)
     return overall_json;
 }
 
-void request_current_user(const Env* env)
+User request_current_user(const Env* env)
 {
     String kaiten_user_url = kaiten_current_user_url(env);
     String answer = request_get(env, &kaiten_user_url);
@@ -67,28 +70,41 @@ void request_current_user(const Env* env)
 
     printf("USER: [%u] %s\n", user.id, user.full_name.ptr);
 
-    delete_user(&user);
     delete_string(&answer);
     delete_string(&kaiten_user_url);
+    return user;
 }
 
-void request_current_card(const Env* env, const Card_request* request)
+/// @todo Заменить Card* на стркутуру, в которой будет описан статус
+/// В теории можно было возвращать Card_array, если под имя стори подходит
+/// несолько различных карточек
+Card* request_current_card(const Env* env, const Card_request* request)
 {
     String kaiten_card_url = card_get_request(env, request);
     String answer = request_get(env, &kaiten_card_url);
     Card_array card_array = read_cards(answer.ptr);
 
-    for (int i = 0; i < card_array.size; ++i) {
+    Card* result = NULL;
+    int found = 0;
+
+    for (int i = 0; i < card_array.size && !found; ++i) {
         Card* card = &card_array.card_ptr[i];
-        printf("    [%u][%u] %s\n", string_contains_substring_view(&card->title, &request->query), card->id, card->title.ptr);
+        found = string_contains_substring_view(&card->title, &request->query);
+        if (found) {
+            result = allocate_card_from_copy(card);
+            printf("    [%u] %s\n", result->id, result->title.ptr);
+        }
     }
 
     delete_card_array(&card_array);
     delete_string(&answer);
     delete_string(&kaiten_card_url);
+
+    return result;
 }
 
-void skird(const Env* env, const Dev_task_list* dev) {
+void skird(const Env* env, const Dev_task_list* dev)
+{
     Story_list* story_ptr = dev->head_story;
     Card_request parent_request = {
         .condition = ACTIVE,
@@ -96,29 +112,42 @@ void skird(const Env* env, const Dev_task_list* dev) {
         .limit = 100,
     };
 
-    while(story_ptr != NULL) {
+    while (story_ptr != NULL) {
         parent_request.query = story_ptr->story.parent_story;
         printf("[] Search (%zu) ", story_ptr->story.parent_story.size);
         print_string_view(&story_ptr->story.parent_story);
         printf("...\n");
 
+        Card* parent_card = NULL;
+
         printf("[] USER_STORY\n");
         parent_request.type_id = USER_STORY;
-        request_current_card(env, &parent_request);
+        parent_card = request_current_card(env, &parent_request);
 
-        printf("[] ENABLER\n");
-        parent_request.type_id = ENABLER;
-        request_current_card(env, &parent_request);
+        if (parent_card == NULL) {
+            printf("[] ENABLER\n");
+            parent_request.type_id = ENABLER;
+            parent_card = request_current_card(env, &parent_request);
+        }
 
-        printf("[] BUG\n");
-        parent_request.type_id = BUG;
-        request_current_card(env, &parent_request);
-        
-        printf("[] TECHDEBT\n");
-        parent_request.type_id = TECHDEBT;
-        request_current_card(env, &parent_request);
+        if (parent_card == NULL) {
+            printf("[] BUG\n");
+            parent_request.type_id = BUG;
+            parent_card = request_current_card(env, &parent_request);
+        }
 
-        printf("[X] Search finished\n\n");
+        if (parent_card == NULL) {
+            printf("[] TECHDEBT\n");
+            parent_request.type_id = TECHDEBT;
+            parent_card = request_current_card(env, &parent_request);
+        }
+
+        if (parent_card == NULL)
+            printf("[ ] Search FAILED\n\n");
+        else {
+            printf("[X] Search finished\n\n");
+            deallocate_card(parent_card);
+        }
         story_ptr = story_ptr->next;
     }
 }
@@ -136,12 +165,27 @@ int main(void)
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
 
-    request_current_user(&env);
-    skird(&env, &dev);
+    String tags[2] = { create_string("ГГИС"), create_string("C++") };
+
+    User user = request_current_user(&env);
+    Create_paramters create_parameters = {
+        .title = create_string_view("Created by C"),
+        .parent = NULL,
+        .config = &skird_config,
+        .tags_ptr = tags,
+        .tags_size = sizeof(tags) / sizeof(String)
+    };
+    create_card(curl, &env, &user, &create_parameters);
+    // skird(&env, &dev);
 
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     clean_task_list(&dev);
     delete_skird_config(&skird_config);
     delete_env(&env);
+    delete_user(&user);
+
+    for (size_t i = 0; i < create_parameters.tags_size; ++i) {
+        delete_string(&tags[i]);
+    }
 }
