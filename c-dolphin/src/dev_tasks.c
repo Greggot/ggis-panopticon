@@ -1,6 +1,5 @@
 #include "dev_tasks.h"
 #include "string_view.h"
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -130,11 +129,6 @@ void read_file(Dev_task_list* dev, size_t* size, const char* path)
     fclose(file);
 }
 
-int char_is_correct(char c)
-{
-    return c != '\n' || c != 0;
-}
-
 /// -------------------------------- PUBLIC -------------------------------- ///
 
 void clean_task_list(Dev_task_list* dev)
@@ -172,8 +166,12 @@ Dev_task_list parse_task_list(const char* path)
 
     for (size_t i = 0; i < size;)
     {
-        while (i < size && char_is_correct(*end_ptr)) {
+        if (*end_ptr == 0)
+            break;
+        while (i < size && *end_ptr != '\n') {
             ++end_ptr;
+            if (*end_ptr == 0)
+                break;
             ++i;
         }
 

@@ -1,4 +1,5 @@
 #include "string.h"
+#include "string_view.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -69,4 +70,22 @@ void add_string_to_string_view(String* string, const String_view* string_view)
     string->ptr = realloc(string->ptr, string->size + 1);
     mempcpy(string->ptr + prev_size, string_view->ptr, string_view->size);
     string->ptr[string->size] = 0;
+}
+
+int string_contains_substring_view(const String* left, const String_view* right)
+{
+    if (right->size > left->size)
+        return 0;
+
+    for (size_t i = 0; i <= (left->size - right->size); ++i)
+    {
+        size_t j = 0;
+        for (; j <= right->size; ++j) {
+            if (left->ptr[i + j] != right->ptr[j])
+                break;
+        }
+        if (j == right->size)
+            return 1;
+    }
+    return 0;
 }

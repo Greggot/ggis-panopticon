@@ -34,6 +34,7 @@ Card_array read_cards(const char* data)
     card_array.size = cJSON_GetArraySize(json);
     if (card_array.size <= 0) {
         card_array.size = 0;
+        cJSON_Delete(json);
         return card_array;
     }
 
@@ -56,7 +57,7 @@ Card_array read_cards(const char* data)
 
 void delete_card_array(Card_array* card_array)
 {
-    for(int i = 0; i < card_array->size; ++i) {
+    for (int i = 0; i < card_array->size; ++i) {
         delete_string(&card_array->card_ptr[i].title);
     }
     free(card_array->card_ptr);

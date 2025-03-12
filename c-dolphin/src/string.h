@@ -17,3 +17,5 @@ void add_string_other(String*, const String*);
 void add_string(String* destination, const char*);
 String add_string_const(const String*, const char*);
 void add_string_to_string_view(String*, const String_view*);
+
+int string_contains_substring_view(const String* left, const String_view* right);
