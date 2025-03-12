@@ -5,10 +5,19 @@
 String create_string(const char* ptr)
 {
     String string;
-    string.size = strlen(ptr) + 1;
-    string.ptr = (char*)malloc(string.size);
+    string.size = strlen(ptr);
+    string.ptr = (char*)malloc(string.size + 1);
     mempcpy(string.ptr, ptr, string.size);
     string.ptr[string.size] = 0;
+    return string;
+}
+
+String allocate_string(size_t size)
+{
+    String string;
+    string.size = size;
+    string.ptr = (char*)malloc(string.size + 1);
+    memset(string.ptr, 0, size + 1);
     return string;
 }
 

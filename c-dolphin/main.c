@@ -1,25 +1,28 @@
+#include "card.h"
 #include "dev_tasks.h"
 #include "env.h"
+#include "kaiten_endpoint.h"
 #include "skird_config.h"
 #include "string.h"
+#include "string_view.h"
 #include "user.h"
 #include <cjson/cJSON.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-String kaiten_current_user_url(const Env* env)
-{
-    return add_string_const(&env->kaiten_host, "/api/latest/users/current");
-}
+typedef enum {
+    USER_STORY,
+    BUG,
+    ENABLER,
+    TECHDEBT,
+} Card_type;
 
-String kaiten_auth_header(const Env* env)
-{
-    String left = create_string("Authorization: Bearer ");
-    add_string_other(&left, &env->kaiten_token);
-    return left;
-}
+typedef enum {
+    ARCHIVED,
+    ACTIVE
+} Card_condition;
 
-size_t write_callback(void* contents, size_t size, size_t nmemb, void* user_parameter)
+size_t user_get_callback(void* contents, size_t size, size_t nmemb, void* user_parameter)
 {
     User user = read_user((char*)contents);
     printf("USER: [%u] %s\n", user.id, user.full_name.ptr);
@@ -39,6 +42,17 @@ int main(void)
     printf("Config: %s\n", skird_config.size_text.ptr);
     delete_skird_config(&skird_config);
 
+    Card_request request = {
+        .type_id = USER_STORY,
+        .condition = ACTIVE,
+        .offset = 0,
+        .limit = 100,
+        .query = create_string_view("131.13")
+    };
+    String get_card_url = card_get_request(&env, &request);
+    printf("Request: %s\n", get_card_url.ptr);
+    delete_string(&get_card_url);
+
     CURL* curl;
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -50,7 +64,7 @@ int main(void)
     String kaiten_user_url = kaiten_current_user_url(&env);
     String kaiten_auth = kaiten_auth_header(&env);
     curl_easy_setopt(curl, CURLOPT_URL, kaiten_user_url.ptr);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, user_get_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, read_buffer);
 
     struct curl_slist* headers = NULL;

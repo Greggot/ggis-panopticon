@@ -9,3 +9,4 @@ typedef struct {
 } String_view;
 
 void print(const String_view*);
+String_view create_string_view(const char*);
