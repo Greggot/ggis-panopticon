@@ -55,15 +55,11 @@ void add_task(Story* story, const String_view* task)
 
 void output_story(const Story* story)
 {
-    printf("Story \"");
-    print_string_view(&story->parent_story);
-    printf("\"\n");
+    printf("Story \"%s\"\n", story->parent_story.ptr);
 
     Task_list* list = story->tasks_head;
     while (list != NULL) {
-        printf("\t");
-        print_string_view(&list->task);
-        printf("\n");
+        printf("\t%s\n", list->task.ptr);
         list = list->next;
     }
 }
@@ -96,19 +92,6 @@ void output(const Dev_task_list* dev)
     }
 }
 
-const char* type_to_string(String_type type)
-{
-    static const char* strings[4] = { "none", "parent", "task", "author" };
-    return strings[(int)type];
-}
-
-void print_with_type(const String_view* string_view)
-{
-    printf("[%s] ", type_to_string(string_type(string_view)));
-    print_string_view(string_view);
-    printf("\n");
-}
-
 /// -------------------------------- PUBLIC -------------------------------- ///
 
 void clean_task_list(Dev_task_list* dev)
@@ -129,11 +112,13 @@ void clean_task_list(Dev_task_list* dev)
     delete_string(&dev->file_data);
 }
 
+/// @todo Добавить автора - если встретилась такая строка, то
+/// дописывать его ко всем последующим задачам, пока не встретится новый
 Dev_task_list parse_task_list(const char* path)
 {
     Dev_task_list dev;
     dev.head_story = NULL;
-    dev.file_data = read_file_string(path);    
+    dev.file_data = read_file_string(path);
 
     Story story;
     story.tasks_head = NULL;
@@ -141,15 +126,14 @@ Dev_task_list parse_task_list(const char* path)
     char* begin_ptr = dev.file_data.ptr;
     char* end_ptr = dev.file_data.ptr;
 
-    for (size_t i = 0; i < dev.file_data.size;)
+    for (size_t i = 0; i < dev.file_data.size && *end_ptr != 0;)
     {
-        if (*end_ptr == 0) {
-            break;
-        }
         while (i < dev.file_data.size && *(end_ptr) != '\n' && *(end_ptr + 1) != 0) {
             ++end_ptr;
             ++i;
         }
+        if (*end_ptr == '\n')
+            *end_ptr = 0;
 
         String_view string_view = {
             .ptr = begin_ptr,
