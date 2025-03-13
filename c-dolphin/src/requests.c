@@ -25,6 +25,24 @@ String request_get(const Env* env, const String* url)
     return overall_json;
 }
 
+
+String request_dayoff_get(const String* url)
+{
+    String overall_json = { .ptr = NULL, .size = 0 };
+
+    curl_easy_setopt(curl, CURLOPT_URL, url->ptr);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, collect_string_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &overall_json);
+
+    struct curl_slist* headers = NULL;
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_perform(curl);
+    printf("GET\n");
+    curl_slist_free_all(headers);
+
+    return overall_json;
+}
+
 String request_post(const Env* env, const String* url, const String* data)
 {
     String overall_json = { .ptr = NULL, .size = 0 };
@@ -82,12 +100,15 @@ void request_patch(const Env* env, const String* url, const String* data)
 
 size_t collect_string_callback(void* contents, size_t size, size_t nmemb, void* string_ptr)
 {
+    printf("GET: %zu\n", nmemb);
     static long response_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
     if (response_code != 200) {
         printf("Error responce code: [%li]%s\n", response_code, (char*)contents);
         return size * nmemb;
     }
+
+    printf("ACQ: %zu\n", nmemb);
 
     String* string = (String*)string_ptr;
     String_view chunk = {

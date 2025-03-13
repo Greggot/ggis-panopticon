@@ -9,3 +9,4 @@ String kaiten_card_children_url(const Env*, int id);
 String kaiten_member_url(const Env*, int id, int user_id);
 String kaiten_members_url(const Env*, int id);
 String kaiten_card_tags_url(const Env*, int id);
+String kaiten_card_time_logs_url(const Env*, int id);

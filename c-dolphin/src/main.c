@@ -1,3 +1,4 @@
+#include "auto_time_log.h"
 #include "card.h"
 #include "card_creation.h"
 #include "dev_tasks.h"
@@ -9,9 +10,6 @@
 #include "string.h"
 #include "string_view.h"
 #include "user.h"
-#include <cjson/cJSON.h>
-#include <curl/curl.h>
-#include <curl/easy.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -129,25 +127,30 @@ void skird(const Env* env, const User* user, const Dev_task_list* dev, Create_pa
 int main(void)
 {
     Env env = read_env("../env/env.json");
-    Dev_task_list dev = parse_task_list("data.txt");
-    Skird_config skird_config = read_skird_config("../env/skird_config/delivery.json");
+    // Dev_task_list dev = parse_task_list("data.txt");
+    // Skird_config skird_config = read_skird_config("../env/skird_config/delivery.json");
 
-    requests_init();
-    User user = request_current_user(&env);
+    // requests_init();
+    // User user = request_current_user(&env);
 
-    String_view tags[2] = { create_string_view("ГГИС"), create_string_view("C++") };
-    Create_paramters create_parameters = {
-        .title = create_string_view("Created by C"),
-        .parent = NULL,
-        .config = &skird_config,
-        .tags_ptr = tags,
-        .tags_size = sizeof(tags) / sizeof(String)
-    };
-    skird(&env, &user, &dev, &create_parameters);
+    // String_view tags[2] = { create_string_view("ГГИС"), create_string_view("C++") };
+    // Create_paramters create_parameters = {
+    //     .title = create_string_view("Created by C"),
+    //     .parent = NULL,
+    //     .config = &skird_config,
+    //     .tags_ptr = tags,
+    //     .tags_size = sizeof(tags) / sizeof(String)
+    // };
+    // skird(&env, &user, &dev, &create_parameters);
 
-    requests_deinit();
-    clean_task_list(&dev);
-    delete_skird_config(&skird_config);
+    Time_log_config time_log_config = read_time_log_config("../env/auto_time_log.json");
+    printf("Log from %s for %u days, each %u minutes\n",
+        time_log_config.start_date.ptr, time_log_config.days_count, time_log_config.time_spent_min);
+        write_time_log(&env, &time_log_config);
+
+    // requests_deinit();
+    // clean_task_list(&dev);
+    // delete_skird_config(&skird_config);
+    // delete_user(&user);
     delete_env(&env);
-    delete_user(&user);
 }

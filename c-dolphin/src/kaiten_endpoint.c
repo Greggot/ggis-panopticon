@@ -76,3 +76,10 @@ String kaiten_card_tags_url(const Env* env, int id)
     append_formatted_string(&url, "/%u/tags", id);
     return url;
 }
+
+String kaiten_card_time_logs_url(const Env* env, int id)
+{
+    String url = kaiten_cards_url(env);
+    append_formatted_string(&url, "/%i/time-logs", id);
+    return url;
+}
