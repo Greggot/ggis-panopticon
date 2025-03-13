@@ -1,8 +1,8 @@
 #include "card_creation.h"
 #include "card.h"
+#include "cd_string.h"
 #include "kaiten_endpoint.h"
 #include "requests.h"
-#include "string.h"
 #include "string_view.h"
 #include <cjson/cJSON.h>
 #include <stdio.h>
@@ -89,7 +89,7 @@ static void post_card_add_tag(const Env* env, const String_view* tag, int id)
     String json = json_single_string_view("name", tag);
     String tags_url = kaiten_card_tags_url(env, id);
     request_post_no_answer(env, &tags_url, &json);
-    
+
     delete_string(&tags_url);
     delete_string(&json);
 }
@@ -131,7 +131,7 @@ static void post_card_add_child(const Env* env, const Card* parent, const Card* 
     String children_url = kaiten_card_children_url(env, parent->id);
     String json = json_single_int("card_id", child->id);
     request_post_no_answer(env, &children_url, &json);
-    
+
     delete_string(&json);
     delete_string(&children_url);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "string.h"
+#include "cd_string.h"
 
 typedef struct {
     String id_19;

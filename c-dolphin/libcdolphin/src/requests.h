@@ -1,7 +1,7 @@
 #pragma once
 
+#include "cd_string.h"
 #include "env.h"
-#include "string.h"
 
 void requests_init(void);
 void requests_deinit(void);

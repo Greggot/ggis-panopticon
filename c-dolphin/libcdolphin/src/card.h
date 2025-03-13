@@ -1,7 +1,7 @@
 #pragma once
 
+#include "cd_string.h"
 #include "env.h"
-#include "string.h"
 #include "string_view.h"
 
 typedef enum {
@@ -34,6 +34,7 @@ typedef struct {
 String card_get_request(const Env*, const Card_request*);
 Card_array read_cards(const char*);
 Card read_card(const char*);
+Card card_by_id(const Env*, int id);
 
 void delete_card_array(Card_array*);
 void deallocate_card(Card*);

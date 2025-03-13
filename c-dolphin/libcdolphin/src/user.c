@@ -1,5 +1,5 @@
 #include "user.h"
-#include "string.h"
+#include "cd_string.h"
 #include <cjson/cJSON.h>
 
 User read_user(const char* json_str)

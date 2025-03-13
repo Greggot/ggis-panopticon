@@ -1,5 +1,5 @@
 #include "kaiten_endpoint.h"
-#include "string.h"
+#include "cd_string.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

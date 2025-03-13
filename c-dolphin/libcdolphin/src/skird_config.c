@@ -1,6 +1,6 @@
 #include "skird_config.h"
 #include "file.h"
-#include "string.h"
+#include "cd_string.h"
 #include <cjson/cJSON.h>
 
 Skird_config read_skird_config(const char* path)

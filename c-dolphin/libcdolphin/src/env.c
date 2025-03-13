@@ -1,6 +1,6 @@
 #include "env.h"
+#include "cd_string.h"
 #include "file.h"
-#include "string.h"
 #include <cjson/cJSON.h>
 #include <stdio.h>
 #include <stdlib.h>

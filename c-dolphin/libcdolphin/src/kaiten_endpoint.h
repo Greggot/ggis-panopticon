@@ -1,6 +1,6 @@
 
 #include "env.h"
-#include "string.h"
+#include "cd_string.h"
 
 String kaiten_current_user_url(const Env*);
 String kaiten_cards_url(const Env*);

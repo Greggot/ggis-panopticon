@@ -1,6 +1,8 @@
 #include "card.h"
+#include "cd_string.h"
 #include "kaiten_endpoint.h"
-#include "string.h"
+#include "requests.h"
+#include "string_view.h"
 #include <cjson/cJSON.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,6 +74,17 @@ Card read_card(const char* data)
         .title = create_string(title->valuestring)
     };
     cJSON_Delete(json);
+    return card;
+}
+
+Card card_by_id(const Env* env, int id)
+{
+    String card_url = kaiten_card_url(env, id);
+    String answer = request_get(env, &card_url);
+    Card card = read_card(answer.ptr);
+
+    delete_string(&card_url);
+    delete_string(&answer);
     return card;
 }
 
