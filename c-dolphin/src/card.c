@@ -44,10 +44,13 @@ Card_array read_cards(const char* data)
         cJSON* card_object = cJSON_GetArrayItem(json, i);
         cJSON* id = cJSON_GetObjectItem(card_object, "id");
         cJSON* title = cJSON_GetObjectItem(card_object, "title");
+        cJSON* properties = cJSON_GetObjectItem(card_object, "properties");
+        cJSON* sprint = cJSON_GetObjectItem(properties, "id_12");
 
         Card card = {
             .id = id->valueint,
-            .title = create_string(title->valuestring)
+            .sprint = (sprint == NULL) ? 0 : sprint->valueint,
+            .title = create_string(title->valuestring),
         };
         card_array.card_ptr[i] = card;
     };
@@ -91,6 +94,7 @@ Card* allocate_card_from_copy(const Card* card)
     Card* result = (Card*)malloc(sizeof(Card));
     result->id = card->id;
     result->type = card->type;
+    result->sprint = card->sprint;
     result->title = create_string(card->title.ptr);
     return result;
 }

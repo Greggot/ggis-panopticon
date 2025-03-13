@@ -10,4 +10,3 @@ String request_get(const Env*, const String* url);
 String request_post(const Env*, const String* url, const String* data);
 void request_post_no_answer(const Env*, const String* url, const String* data);
 void request_patch(const Env*, const String* url, const String* data);
-String request_dayoff_get(const String* url);

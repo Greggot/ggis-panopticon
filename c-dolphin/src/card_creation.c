@@ -89,7 +89,7 @@ static void post_card_add_tag(const Env* env, const String_view* tag, int id)
     String json = json_single_string_view("name", tag);
     String tags_url = kaiten_card_tags_url(env, id);
     request_post_no_answer(env, &tags_url, &json);
-
+    
     delete_string(&tags_url);
     delete_string(&json);
 }
@@ -131,7 +131,7 @@ static void post_card_add_child(const Env* env, const Card* parent, const Card* 
     String children_url = kaiten_card_children_url(env, parent->id);
     String json = json_single_int("card_id", child->id);
     request_post_no_answer(env, &children_url, &json);
-
+    
     delete_string(&json);
     delete_string(&children_url);
 }
@@ -139,8 +139,8 @@ static void post_card_add_child(const Env* env, const Card* parent, const Card* 
 void create_card(const Env* env, const User* user, const Create_paramters* creator)
 {
     String url = kaiten_cards_url(env);
-    String post_data = post_card_create_data(creator, user);
-    String answer = request_post(env, &url, &post_data);
+    String json = post_card_create_data(creator, user);
+    String answer = request_post(env, &url, &json);
     Card created_card = read_card(answer.ptr);
 
     if (creator->parent != NULL) {
@@ -155,7 +155,7 @@ void create_card(const Env* env, const User* user, const Create_paramters* creat
     printf("Created card: %s/%u\n", env->kaiten_host.ptr, created_card.id);
 
     delete_string(&created_card.title);
-    delete_string(&post_data);
+    delete_string(&json);
     delete_string(&answer);
     delete_string(&url);
 }
